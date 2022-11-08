@@ -95,12 +95,14 @@ public class testsSprint1 {
         //Act
         System.out.println("Type the title of the artwork");
         String inputTitle = scanner.nextLine();
+
         System.out.println("What is the year of the artwork?");
         int inputYear = Integer.parseInt(scanner.nextLine());
+
         System.out.println(inputTitle + " created in " + inputYear +". What is the name of the artist?");
         String inputArtistName = scanner.nextLine();
-        Artist artist = new Artist (inputArtistName);
 
+        Artist artist = new Artist (inputArtistName);
         Artwork artwork= new Artwork(inputTitle, artist, inputYear);
 
         System.out.println("The following artwork has been created: " + artwork.toString() + "Type 1 to proceed");
@@ -125,20 +127,40 @@ public class testsSprint1 {
     }
 
     @Test
-    @DisplayName("Calling in the seperate method of creating an artwork, than double checking if this object has been added" +
-            "to the database")
+    @DisplayName("From consul, finding an artwork in the database")
     void testIfConsulAddsToDataBase() {
 
         //Arrange
-        addArtWorkConsul();
-        String query = "SELECT a From Artwork a";
-        TypedQuery<Artwork> jpqlQuery = em.createQuery(query, Artwork.class);
-        Artwork artwork = jpqlQuery.getSingleResult();
+        createSeveralArtWorks();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("The following two artists are currently in the database: Max Ernst, Constantin Brancusi.\n" +
+                "Type 1 for Max Ernst artworks, type 2 for Constantin Brancusi artworks");
+        String queryFindArtwork = "";
 
         //Act
+        boolean whileSwitch = false;
+        while (whileSwitch = false) {
+            String input = scanner.nextLine();
+            if (input.equals("1")) {
+                queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Max Ernst'";
+                whileSwitch = true;
 
+            }
+            if (input.equals("2")) {
+                queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Constatnin Brancusi'";
+                whileSwitch = true;
+            } else {
+                System.out.println("Wrong input. Type 1 for Max Ernst, 2 for Brancusi");
+            }
+        }
+
+        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindArtwork, Artwork.class);
+        List<Artwork> artworks = psqlQuery.getResultList();
+        for (Artwork a: artworks) {
+            System.out.println(a);
+        }
         //Assert
-
+        assertThat(artworks.get(0).getArtist().getName()).isEqualTo();
     }
 
 
@@ -174,6 +196,7 @@ public class testsSprint1 {
         });
     }
 
+    @Test
     private void addArtWorkConsul() {
         Scanner scanner = new Scanner(System.in);
 
