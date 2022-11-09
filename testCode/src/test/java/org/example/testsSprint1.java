@@ -115,7 +115,7 @@ public class testsSprint1 {
         }
         else System.out.println("Mission aborted");
 
-// Clear entitiy mangaer
+
         em.clear();
         String query = "SELECT a From Artwork a";
         TypedQuery<Artwork> jpqlQuery = em.createQuery(query, Artwork.class);
@@ -169,7 +169,7 @@ public class testsSprint1 {
     }
 
 
-    private void executeTransaction(Consumer<EntityManager> consumer) {
+    public void executeTransaction(Consumer<EntityManager> consumer) {
 
         try {
             em.getTransaction().begin();
@@ -183,7 +183,7 @@ public class testsSprint1 {
         }
     }
 
-    private void createSeveralArtWorks() {
+    public void createSeveralArtWorks() {
         Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
         Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941);
         Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931);
@@ -202,7 +202,7 @@ public class testsSprint1 {
     }
 
     @Test
-    private void addArtWorkConsul() {
+    public void addArtWorkConsul() {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Type the title of the artwork");
