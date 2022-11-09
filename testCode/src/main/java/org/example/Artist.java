@@ -17,6 +17,7 @@ public class Artist {
     private Styles style;
 
     @OneToMany(mappedBy = "artist")
+    @Column (name = "Artist_artworks")
     private Collection<Artwork> artworks = new ArrayList<>();
 
     public Long getId() {

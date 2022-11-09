@@ -9,10 +9,12 @@ public class Artwork {
     private Long id;
 
     private String title;
-
     @ManyToOne
     private Artist artist;
     private int year;
+
+    @ManyToOne
+    private Location location;
 
     public Long getId() {
         return id;
@@ -59,6 +61,7 @@ public class Artwork {
 
     public boolean moveTo(Location location) {
         if (location.add(this)) {
+            this.location = location;
             return true;
         }
         return false;

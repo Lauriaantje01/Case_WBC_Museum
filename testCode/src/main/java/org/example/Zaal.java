@@ -1,15 +1,14 @@
 package org.example;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Depot extends Location{
+public class Zaal extends Location {
 
-    @OneToMany (mappedBy = "location")
+    @OneToMany(mappedBy = "location")
     private List<Artwork> artworks = new ArrayList<>();
 
     @Override
@@ -29,6 +28,6 @@ public class Depot extends Location{
     }
 
     public String toString() {
-        return "Depot";
+        return "Zaal";
     }
 }

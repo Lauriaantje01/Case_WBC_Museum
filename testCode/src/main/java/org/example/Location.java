@@ -1,12 +1,29 @@
 package org.example;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface Location {
-    List<Artwork> artworks = new ArrayList<>();
+@Entity
+@Inheritance (strategy = InheritanceType.JOINED)
 
-    boolean add(Artwork a);
+public abstract class Location {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    private Long id;
 
-    boolean remove(Artwork a);
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    abstract boolean add(Artwork a);
+
+    abstract boolean remove(Artwork a);
+
+    abstract public List<Artwork> getArtworks();
 }
