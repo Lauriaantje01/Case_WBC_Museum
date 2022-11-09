@@ -5,13 +5,17 @@ import javax.persistence.*;
 @Entity
 public class Artwork {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     private String title;
     @ManyToOne
     private Artist artist;
     private int year;
+
+    public Location getLocation() {
+        return location;
+    }
 
     @ManyToOne
     private Location location;
@@ -69,7 +73,7 @@ public class Artwork {
 
     @Override
     public String toString() {
-        return "[Title: " + title + ", Artist: " + artist.getName() + ", Year: " + year + "]";
+        return "[Title: " + title + ", Artist: " + artist.getName() + ", Year: " + year + ", Location: " + location +"]";
     }
 
 

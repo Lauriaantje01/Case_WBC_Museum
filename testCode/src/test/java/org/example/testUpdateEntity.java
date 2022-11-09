@@ -52,7 +52,7 @@ public class testUpdateEntity {
     void testQueryWithvariable() {
         System.out.println("Type year of artwork you want to find");
         createSeveralArtWorks();
-        Scanner scanner = createScanner();
+        Scanner scanner = new Scanner(System.in);
 
         int lookingForYear = Integer.parseInt(scanner.nextLine());
         String queryFindArtwork = "SELECT a from Artwork a where a.year = :lookingForYear";
@@ -78,10 +78,9 @@ public class testUpdateEntity {
             System.out.println(a.getId() + " " + a.toString());
         }
 
-
         System.out.println("Type ID number of artwork you want to find");
 
-        Scanner scanner = createScanner();
+        Scanner scanner = new Scanner(System.in);
 
         Long inputID = Long.parseLong(scanner.nextLine());
         Artwork foundArtwork = em.find(Artwork.class, inputID);
@@ -112,8 +111,7 @@ public class testUpdateEntity {
                 em.persist(artwork);
                 em.persist(location);
             });
-        }
-        else {
+        } else {
             System.out.println("Something went wrong, contact administrator or try again.");
         }
 
@@ -142,14 +140,12 @@ public class testUpdateEntity {
             locationInput = depot;
             moved = artwork.moveTo(depot);
             System.out.println(artwork.toString() + " was moved to " + depot.toString());
-        }
-        else if (userInput == 2) {
+        } else if (userInput == 2) {
             locationInput = zaal;
             moved = artwork.moveTo(zaal);
             System.out.println(artwork.toString() + " was moved to " + zaal.toString());
 
-        }
-        else {
+        } else {
             System.out.println("Something went wrong, contact administrator or try again.");
         }
         executeTransaction(em -> {
@@ -161,6 +157,57 @@ public class testUpdateEntity {
         //Assert
         assertThat(moved).isEqualTo(true);
         assertThat(locationInput.getArtworks().get(0).getId()).isEqualTo(artwork.getId());
+    }
+
+    @Test
+    @DisplayName("Creating the museum method, requesting an update of where everything is and printing this to consul")
+    void whereIsEverything() {
+        // Arrange
+        createMuseum();
+        // Act
+        List<Artwork> allArtworks = findAllArtworks();
+        for (Artwork a: allArtworks) {
+            System.out.println(a);
+        }
+        //Assert
+
+    }
+
+    @Test
+    @DisplayName("Moving artwork from depot to zaal with user input")
+    void moveArtWorkZaalToDepot() {
+        // Arrange
+        createMuseum();
+        Scanner scanner = new Scanner(System.in);
+        Artwork artwork = queryWithId();
+        List<Location> locations = findAllLocations();
+        // Act
+        Location currentLocation = artwork.getLocation();
+
+        if (currentLocation instanceof Depot) {
+            System.out.println("Do you want to move " + artwork + "to the Zaal?");
+        }
+
+
+        System.out.println("Type 1 to move the artwork to the depot, type 2 for moving it to the Zaal");
+        int userInput = Integer.parseInt(scanner.nextLine());
+        boolean moved = false;
+        if (userInput == 1) {
+            moved = true;
+            System.out.println(artwork.toString() + " was moved to " + );
+        } else if (userInput == 2) {
+            moved = true;
+            System.out.println(artwork.toString() + " was moved to " + );
+
+        } else {
+            System.out.println("Something went wrong, contact administrator or try again.");
+        }
+        executeTransaction(em -> {
+            em.persist(artwork);
+        });
+
+        //Assert
+        assertThat(moved).isEqualTo(true);
     }
 
 
@@ -196,15 +243,9 @@ public class testUpdateEntity {
         }
     }
 
-    private Scanner createScanner() {
-        Scanner scanner = new Scanner(System.in);
-        return scanner;
-    }
-
     private Artwork queryWithId() {
-        String queryFindArtwork = "SELECT a from Artwork a";
-        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindArtwork, Artwork.class);
-        List<Artwork> artwork = psqlQuery.getResultList();
+
+        List<Artwork> artwork = findAllArtworks();
 
         for (Artwork a : artwork) {
             System.out.println(a.getId() + " " + a.toString());
@@ -212,7 +253,7 @@ public class testUpdateEntity {
 
         System.out.println("Type ID number of artwork you want to change");
 
-        Scanner scanner = createScanner();
+        Scanner scanner = new Scanner(System.in);
 
         Long inputID = Long.parseLong(scanner.nextLine());
         Artwork foundArtwork = em.find(Artwork.class, inputID);
@@ -249,6 +290,19 @@ public class testUpdateEntity {
             em.persist(depot);
         });
 
+        em.clear();
+    }
+
+    private List<Artwork> findAllArtworks() {
+        String queryFindAllArtworks = "SELECT a from Artwork a";
+        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindAllArtworks, Artwork.class);
+        return psqlQuery.getResultList();
+    }
+
+    private List<Location> findAllLocations() {
+        String locationQuery = "SELECT l from Location l";
+        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
+        return jpqlQueryLocation.getResultList();
     }
 
 }
