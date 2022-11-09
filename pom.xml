@@ -9,7 +9,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>sprint1</module>
+        <module>productieCode</module>
+        <module>testCode</module>
     </modules>
 
     <properties>

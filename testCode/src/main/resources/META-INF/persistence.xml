@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://java.sun.com/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+    <persistence-unit name="jpa-hiber-postgres-pu" transaction-type="RESOURCE_LOCAL">
+        <!--The persistence unit is a consistent description of all the relevant properties of all the layers
+        that should be traversed to go from JPA to the database tables -->
+        <description> JPA Course</description>
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgresPlusDialect"/>
+            <property name="hibernate.generate_statistics" value="true"/>
+            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/cursistdb"/>
+            <property name="javax.persistence.jdbc.user" value="cursist"/>
+            <property name="javax.persistence.jdbc.password" value="PaSSw0rd"/>
+            <property name="javax.persistence.schema-generation.database.action"  value="drop-and-create"/>
+        </properties>
+
+    </persistence-unit>
+
+
+</persistence>

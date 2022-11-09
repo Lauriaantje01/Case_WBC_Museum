@@ -13,6 +13,12 @@ public class Depot implements Location{
         return true;
     }
 
+    @Override
+    public boolean remove(Artwork a) {
+        artworks.remove(a);
+        return true;
+    }
+
     public List<Artwork> getArtworks() {
         return artworks;
     }

@@ -115,7 +115,8 @@ public class testsSprint1 {
         }
         else System.out.println("Mission aborted");
 
-
+// Clear entitiy mangaer
+        em.clear();
         String query = "SELECT a From Artwork a";
         TypedQuery<Artwork> jpqlQuery = em.createQuery(query, Artwork.class);
         Artwork artworkDB = jpqlQuery.getSingleResult();
