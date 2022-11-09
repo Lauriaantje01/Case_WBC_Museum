@@ -1,6 +1,5 @@
 package org.example;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,13 +8,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.example.Styles.*;
 
 public class testsSprint1 {
     String persistenceUnitName = "jpa-hiber-postgres-pu";
@@ -25,7 +22,7 @@ public class testsSprint1 {
     @Test
     @DisplayName("creating object/entity Artist")
     void createArtistWithArtWork() {
-        Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
         Artwork artwork = new Artwork("Europe after the Rain II", maxErnst, 1941);
 
         System.out.println(maxErnst.getArtworks());
@@ -35,7 +32,7 @@ public class testsSprint1 {
     @Test
     @DisplayName("Adding artist + artwork to the database. Both objects are now entities and have a one to many relation")
     void addArtistArtworkToDatabase() {
-        Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
         Artwork artwork = new Artwork("Europe after the Rain II", maxErnst, 1941);
 
         executeTransaction(em -> {
@@ -184,11 +181,11 @@ public class testsSprint1 {
     }
 
     public void createSeveralArtWorks() {
-        Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
         Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941);
         Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931);
         Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924);
-        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957, SURREALISM);
+        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957);
         Artwork artwork4 = new Artwork("The Fish", brancusi, 1924);
 
         executeTransaction(em -> {

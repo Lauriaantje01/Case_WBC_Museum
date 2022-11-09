@@ -14,6 +14,9 @@ public class Depot extends Location{
 
     @Override
     public boolean add(Artwork a) {
+        if (artworks.contains(a)) {
+            return false;
+        }
         artworks.add(a);
         return true;
     }
@@ -29,6 +32,6 @@ public class Depot extends Location{
     }
 
     public String toString() {
-        return "Depot";
+        return "depot";
     }
 }

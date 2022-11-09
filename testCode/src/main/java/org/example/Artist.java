@@ -14,7 +14,6 @@ public class Artist {
     private String name;
     private int yearOfBirth;
     private int yearOfDeath;
-    private Styles style;
 
     @OneToMany(mappedBy = "artist")
     @Column (name = "Artist_artworks")
@@ -29,11 +28,10 @@ public class Artist {
     }
 
 
-    public Artist(String name, int year, int death, Styles style) {
+    public Artist(String name, int year, int death) {
         setName(name);
         setYearOfBirth(year);
         setYearOfDeath(death);
-        setStyle(style);
     }
     public Artist(String name) {
         setName(name);
@@ -69,14 +67,6 @@ public class Artist {
 
     public void setYearOfDeath(int death) {
         this.yearOfDeath = death;
-    }
-
-    public Styles getStyle() {
-        return style;
-    }
-
-    public void setStyle(Styles style) {
-        this.style = style;
     }
 
     public void addArtwork(Artwork artwork) {

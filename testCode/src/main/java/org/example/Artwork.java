@@ -12,13 +12,15 @@ public class Artwork {
     @ManyToOne
     private Artist artist;
     private int year;
+    @ManyToOne
+    private Location location;
+
+    @OneToOne
+    private Bruikleen bruikleen;
 
     public Location getLocation() {
         return location;
     }
-
-    @ManyToOne
-    private Location location;
 
     public Long getId() {
         return id;
@@ -32,6 +34,13 @@ public class Artwork {
         setTitle(title);
         setArtist(artist);
         setYear(year);
+    }
+
+    public Artwork(String title, Artist artist, int year, Location location) {
+        setTitle(title);
+        setArtist(artist);
+        setYear(year);
+        this.location = location;
     }
 
     public Artwork() {
@@ -67,8 +76,10 @@ public class Artwork {
         if (location.add(this)) {
             this.location = location;
             return true;
+        } else {
+            System.out.println("Artwork was already in the location or something else went wrong");
+            return false;
         }
-        return false;
     }
 
     @Override

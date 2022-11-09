@@ -8,6 +8,7 @@ import java.util.List;
 @Inheritance (strategy = InheritanceType.JOINED)
 
 public abstract class Location {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;

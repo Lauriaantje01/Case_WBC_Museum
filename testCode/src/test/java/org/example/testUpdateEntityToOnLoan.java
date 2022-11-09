@@ -13,10 +13,8 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.example.Styles.DADA;
-import static org.example.Styles.SURREALISM;
 
-public class testUpdateEntity {
+public class testUpdateEntityToOnLoan {
 
     String persistenceUnitName = "jpa-hiber-postgres-pu";
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName);
@@ -166,7 +164,7 @@ public class testUpdateEntity {
         createMuseum();
         // Act
         List<Artwork> allArtworks = findAllArtworks();
-        for (Artwork a: allArtworks) {
+        for (Artwork a : allArtworks) {
             System.out.println(a);
         }
         //Assert
@@ -174,8 +172,9 @@ public class testUpdateEntity {
     }
 
     @Test
-    @DisplayName("Moving artwork from depot to zaal with user input")
-    void moveArtWorkZaalToDepot() {
+    @DisplayName("Trying to deduce from database what the current location is of the artwork and where it is not with an" +
+            "instance of method. consul is used to directly validate the outcome")
+    void isTheArtworkInTheDepot() {
         // Arrange
         createMuseum();
         Scanner scanner = new Scanner(System.in);
@@ -185,19 +184,36 @@ public class testUpdateEntity {
         Location currentLocation = artwork.getLocation();
 
         if (currentLocation instanceof Depot) {
-            System.out.println("Do you want to move " + artwork + "to the Zaal?");
+            System.out.println("artwork is in the depot");
+        } else {
+            System.out.println("the artwork is elsewhere");
+
         }
+        //Assert
+    }
 
+    @Test
+    @DisplayName("Test method for finding an artwork and changing its location with user input to either the Depot or " +
+            "to the Zaal. Cleared up with external methods")
+    void testMoveArtworkByUserToLocationCLEAN() {
+        // Arrange
+        createMuseum();
+        Artwork artwork = queryWithId();
+        Scanner scanner = new Scanner(System.in);
+        List<Location> locations = findAllLocations();
+        Location locationInput = null;
 
-        System.out.println("Type 1 to move the artwork to the depot, type 2 for moving it to the Zaal");
+        // Act
+        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the " + locations.get(1));
         int userInput = Integer.parseInt(scanner.nextLine());
         boolean moved = false;
         if (userInput == 1) {
-            moved = true;
-            System.out.println(artwork.toString() + " was moved to " + );
+            locationInput = locations.get(0);
+            moved = artwork.moveTo(locations.get(0));
+
         } else if (userInput == 2) {
-            moved = true;
-            System.out.println(artwork.toString() + " was moved to " + );
+            locationInput = locations.get(1);
+            moved = artwork.moveTo(locations.get(1));
 
         } else {
             System.out.println("Something went wrong, contact administrator or try again.");
@@ -206,17 +222,42 @@ public class testUpdateEntity {
             em.persist(artwork);
         });
 
+        em.clear();
+
         //Assert
-        assertThat(moved).isEqualTo(true);
+        assertThat(artwork.getLocation().getId()).isEqualTo(em.find(Location.class, locationInput.getId()).getId());
     }
 
+    @Test
+    @DisplayName("Test to move artwork to OnLoan")
+    void testMoveArtworkToOnloan() {
+        // Arrange
+        createMuseum();
+        String randomQuery = "SELECT a FROM Artwork a WHERE a.year = 1931";
+        TypedQuery<Artwork> jpqlRandomQuery = em.createQuery(randomQuery, Artwork.class);
+        Artwork artworkForBruikleen = jpqlRandomQuery.getSingleResult();
+
+        List<Location> locations = findAllLocations();
+        Location onLoan = locations.get(2);
+        // Act
+
+        artworkForBruikleen.moveTo(onLoan);
+        executeTransaction(em -> {
+            em.persist(artworkForBruikleen);
+        });
+
+        System.out.println(artworkForBruikleen.getLocation());
+
+        //Assert
+        assertThat(artworkForBruikleen.getLocation().getArtworks().isEmpty()).isEqualTo(false);
+    }
 
     private void createSeveralArtWorks() {
-        Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
         Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941);
         Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931);
         Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924);
-        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957, SURREALISM);
+        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957);
         Artwork artwork4 = new Artwork("The Fish", brancusi, 1924);
 
         executeTransaction(em -> {
@@ -266,18 +307,14 @@ public class testUpdateEntity {
     public void createMuseum() {
         Location depot = new Depot();
         Location zaal = new Zaal();
+        Location onLoan = new OnLoan();
 
-        Artist maxErnst = new Artist("Max Ernst", 1891, 1976, DADA);
-        Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941);
-        Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931);
-        Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924);
-        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957, SURREALISM);
-        Artwork artwork4 = new Artwork("The Fish", brancusi, 1924);
-
-        artwork1.moveTo(depot);
-        artwork2.moveTo(depot);
-        artwork3.moveTo(zaal);
-        artwork4.moveTo(depot);
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
+        Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941, zaal);
+        Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931, depot);
+        Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924, depot);
+        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957);
+        Artwork artwork4 = new Artwork("The Fish", brancusi, 1924, depot);
 
         executeTransaction(em -> {
             em.persist(maxErnst);
@@ -288,6 +325,7 @@ public class testUpdateEntity {
             em.persist(artwork4);
             em.persist(zaal);
             em.persist(depot);
+            em.persist(onLoan);
         });
 
         em.clear();
