@@ -66,7 +66,7 @@ public class Artwork {
 
     @Override
     public String toString() {
-        return "[Id: " + id + " Title: " + title + " Artist: " + artist.getName() + "]";
+        return "[Title: " + title + ", Artist: " + artist.getName() + ", Year: " + year + "]";
     }
 
 

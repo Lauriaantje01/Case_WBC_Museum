@@ -66,8 +66,8 @@ public class testsSprint1 {
     void addingMultipleArtWorksAndArtists() {
         createSeveralArtWorks();
         String queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Max Ernst'";
-        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindArtwork, Artwork.class);
-        List<Artwork> artworks = psqlQuery.getResultList();
+        TypedQuery<Artwork> psqlQueryFindArtwork = em.createQuery(queryFindArtwork, Artwork.class);
+        List<Artwork> artworks = psqlQueryFindArtwork.getResultList();
 
         for (Artwork a : artworks) {
             System.out.println(a);
@@ -105,15 +105,13 @@ public class testsSprint1 {
         Artist artist = new Artist (inputArtistName);
         Artwork artwork= new Artwork(inputTitle, artist, inputYear);
 
-        System.out.println("The following artwork has been created: " + artwork.toString() + "Type 1 to proceed");
+        System.out.println("The following artwork has been created: " + artwork.toString() + "\nType 1 to proceed");
         String answerProceed = scanner.nextLine();
         if (answerProceed.equals("1")) {
             executeTransaction(em -> {
                 em.persist(artist);
                 em.persist(artwork);
             });
-            System.out.println("You added the following object to the database: \n" +
-                    artwork.toString());
         }
         else System.out.println("Mission aborted");
 
@@ -121,6 +119,8 @@ public class testsSprint1 {
         String query = "SELECT a From Artwork a";
         TypedQuery<Artwork> jpqlQuery = em.createQuery(query, Artwork.class);
         Artwork artworkDB = jpqlQuery.getSingleResult();
+        System.out.println("You added the following object to the database: \n" +
+                artworkDB.toString());
 
         // Assert
         assertThat(artworkDB.getTitle()).isEqualTo(inputTitle);
@@ -136,21 +136,25 @@ public class testsSprint1 {
         System.out.println("The following two artists are currently in the database: Max Ernst, Constantin Brancusi.\n" +
                 "Type 1 for Max Ernst artworks, type 2 for Constantin Brancusi artworks");
         String queryFindArtwork = "";
+        String chosenArtistName = "";
+        String input = scanner.nextLine();
 
         //Act
         boolean whileSwitch = false;
-        while (whileSwitch = false) {
-            String input = scanner.nextLine();
+        while (whileSwitch == false) {
             if (input.equals("1")) {
                 queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Max Ernst'";
                 whileSwitch = true;
+                chosenArtistName = "Max Ernst";
 
             }
-            if (input.equals("2")) {
-                queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Constatnin Brancusi'";
+            else if (input.equals("2")) {
+                queryFindArtwork = "SELECT a from Artwork a where a.artist.name = 'Constantin Brancusi'";
                 whileSwitch = true;
+                chosenArtistName = "Constantin Brancusi";
             } else {
                 System.out.println("Wrong input. Type 1 for Max Ernst, 2 for Brancusi");
+                input = scanner.nextLine();
             }
         }
 
@@ -160,7 +164,7 @@ public class testsSprint1 {
             System.out.println(a);
         }
         //Assert
-        assertThat(artworks.get(0).getArtist().getName()).isEqualTo();
+        assertThat(artworks.get(0).getArtist().getName()).isEqualTo(chosenArtistName);
     }
 
 
