@@ -92,7 +92,30 @@ public class menuTests {
     }
 
     @Test
-    @DisplayName("Proceed method")
+    @DisplayName("Proceed method, a method that gives back a boolean whether the user wants to proceed or not")
+    void testProceedMethod() {
+    boolean proceed = proceed();
+        System.out.println(proceed);
+    }
+
+    @Test
+    @DisplayName("Proceed method, a method that gives back a boolean whether the user wants to proceed or not")
+    boolean proceed() {
+        System.out.println("Type 1 to proceed or 2 to exit");
+        String answerProceed = scanner.nextLine();
+        boolean whileSwitch = false;
+
+        while (!(whileSwitch)) {
+            if (answerProceed.equals("1")) {
+                return true;
+            } else if (answerProceed.equals("2")) {
+                return false;
+
+            } else System.out.println("Try again typing either 1 or 2");
+            answerProceed = scanner.nextLine();
+        }
+        return false;
+    }
 
 
     private void executeTransaction(Consumer<EntityManager> consumer) {

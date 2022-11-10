@@ -200,6 +200,8 @@ public class testsSprint1 {
 
     @Test
     public void addArtWorkConsul() {
+        createMuseum();
+
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Type the title of the artwork");
@@ -225,5 +227,32 @@ public class testsSprint1 {
                     artwork.toString());
         }
         else System.out.println("Mission aborted");
+    }
+
+    private void createMuseum() {
+        Location depot = new Depot();
+        Location zaal = new Zaal();
+        Location onLoan = new OnLoan();
+
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
+        Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941, zaal);
+        Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931, depot);
+        Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924, depot);
+        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957);
+        Artwork artwork4 = new Artwork("The Fish", brancusi, 1924, depot);
+
+        executeTransaction(em -> {
+            em.persist(maxErnst);
+            em.persist(artwork1);
+            em.persist(artwork2);
+            em.persist(artwork3);
+            em.persist(brancusi);
+            em.persist(artwork4);
+            em.persist(zaal);
+            em.persist(depot);
+            em.persist(onLoan);
+        });
+
+        em.clear();
     }
 }

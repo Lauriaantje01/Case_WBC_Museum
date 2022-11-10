@@ -99,4 +99,21 @@ public class MainMenu {
         return jpqlQueryLocation.getResultList();
     }
 
+    private boolean proceed() {
+        System.out.println("Type 1 to proceed or 2 to exit");
+        String answerProceed = scanner.nextLine();
+        boolean whileSwitch = false;
+
+        while (!(whileSwitch)) {
+            if (answerProceed.equals("1")) {
+                return true;
+            }
+            if (answerProceed.equals("2")) {
+                return false;
+            } else System.out.println("Try again typing either 1 or 2");
+            answerProceed = scanner.nextLine();
+        }
+        return false;
+    }
+
 }
