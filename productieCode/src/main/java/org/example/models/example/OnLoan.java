@@ -1,8 +1,7 @@
-package org.example;
+package org.example.models.example;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

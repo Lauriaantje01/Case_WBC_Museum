@@ -252,6 +252,65 @@ public class testUpdateEntityToOnLoan {
         assertThat(artworkForBruikleen.getLocation().getArtworks().isEmpty()).isEqualTo(false);
     }
 
+
+    @Test
+    @DisplayName("Method testing for moving to on loan and creating a contract in the process")
+    void createContractForLoan() {
+        // Arrange
+        createMuseum();
+        Artwork artwork = queryWithId();
+        List<Location> locations = findAllLocations();
+        Scanner scanner = new Scanner(System.in);
+        // Act
+        moveArtworkOnLoan(artwork, locations.get(2));
+
+        //Assert
+        assertThat(artwork.getLocation()).isEqualTo(locations.get(2));
+        assertThat(artwork.getBruikleenContract()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Demo method in which user can choose to move an artwork to the depot, zaal or on loan")
+    void testMoveArtworkByUserINCLoan() {
+        // Arrange
+        createMuseum();
+        Artwork artwork = queryWithId();
+        Scanner scanner = new Scanner(System.in);
+        List<Location> locations = findAllLocations();
+        Location locationInput = null;
+
+        // Act
+        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
+                + locations.get(1) + " , type 3 when the artwork goes on loan");
+        int userInput = Integer.parseInt(scanner.nextLine());
+
+        if (userInput == 1) {
+            locationInput = locations.get(0);
+            artwork.moveTo(locations.get(0));
+
+        } else if (userInput == 2) {
+            locationInput = locations.get(1);
+            artwork.moveTo(locations.get(1));
+
+        } else if (userInput == 3) {
+            locationInput = locations.get(2);
+            moveArtworkOnLoan(artwork, locationInput);
+
+        } else {
+            System.out.println("Something went wrong, contact administrator or try again.");
+        }
+
+        executeTransaction(em -> {
+            em.persist(artwork);
+        });
+
+        em.clear();
+        System.out.println(em.find(Artwork.class, artwork.getId()));
+
+        //Assert
+        assertThat(em.find(Artwork.class, artwork.getId()).getLocation().getId()).isEqualTo(em.find(Location.class, locationInput.getId()).getId());
+    }
+
     private void createSeveralArtWorks() {
         Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
         Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941);
@@ -341,6 +400,24 @@ public class testUpdateEntityToOnLoan {
         String locationQuery = "SELECT l from Location l";
         TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
         return jpqlQueryLocation.getResultList();
+    }
+
+    private boolean moveArtworkOnLoan(Artwork artwork, Location onloan) {
+        System.out.println("To move an artwork to on loan, please add the following for the loan contract:" +
+                "What is the address?");
+        Scanner scanner = new Scanner(System.in);
+        String address = scanner.nextLine();
+        System.out.println(artwork + " will go on loan at the following address: " + address);
+
+        BruikleenContract bruikleenContract = new BruikleenContract(artwork, address);
+        artwork.setBruikleenContract(bruikleenContract);
+        boolean successMove = artwork.moveTo(onloan);
+
+        executeTransaction(em -> {
+            em.persist(artwork);
+            em.persist(bruikleenContract);
+        });
+        return successMove;
     }
 
 }

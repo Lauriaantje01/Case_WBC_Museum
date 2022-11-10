@@ -1,7 +1,6 @@
-package org.example;
+package org.example.models.example;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity

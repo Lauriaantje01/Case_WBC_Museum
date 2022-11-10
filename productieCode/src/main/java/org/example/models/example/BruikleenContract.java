@@ -1,22 +1,25 @@
-package org.example;
+package org.example.models.example;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
 @Entity
-public class Bruikleen {
+public class BruikleenContract {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @OneToOne (mappedBy = "bruikleen")
+    @OneToOne (mappedBy = "bruikleenContract")
     private Artwork artwork;
     private String address;
 
-    public Bruikleen() {
-        address = "Unknown, notify curator";
+    public BruikleenContract(Artwork artwork, String address) {
+        setArtwork(artwork);
+        setAddress(address);
     }
 
+    public BruikleenContract() {
+        address = "Unknown, notify curator";
+    }
 
     public Long getId() {
         return id;
@@ -24,12 +27,6 @@ public class Bruikleen {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-
-    public Bruikleen(Artwork artwork, String address) {
-        setArtwork(artwork);
-        setAddress(address);
     }
 
     public Artwork getArtwork() {
