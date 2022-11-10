@@ -11,12 +11,22 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+/*
+The main menu serves as a switch board to the other two submenus: interacting with the current collection or adding
+a new artwork to the collection. The emf is passed on to the other submenus.
+
+The menu sets up the Entity Manager Factory and creates the main museum objects. The createMuseum method, as well as
+the executeTransaction method can be removed once there is already a filled database at the start of the program.
+
+ */
+
 public class MainMenu {
     String persistenceUnitName = "jpa-hiber-postgres-pu";
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName);
     EntityManager em = emf.createEntityManager();
+    AddArtworkMenu addArtworkMenu = new AddArtworkMenu(emf);
 
-    AddArtworkMenu addArtworkMenu = new AddArtworkMenu();
+    CollectionMenu collectionMenu = new CollectionMenu(emf);
     Scanner scanner = new Scanner(System.in);
 
     public MainMenu() {
@@ -24,6 +34,8 @@ public class MainMenu {
 
     public void startMenu() {
         createMuseum();
+        em.close(); // Presume that from now one the menu does not need to interact with the museum objects anymore.
+
         System.out.println("Welcome to the pilot of the Walter Bosch Complex museum admin system. \n\n");
 
         int input;
@@ -36,11 +48,14 @@ public class MainMenu {
             input = Integer.parseInt(scanner.nextLine());
 
             if (input == 1) {
-                System.out.println("move to current collection menu");
+                collectionMenu.startCollectionMenu();
+
             } else if (input == 2) {
                 addArtworkMenu.startAddArtworkMenu();
+
             } else if (input == 3) {
                 proceed = false;
+
             } else System.out.println("Try again typing either 1, 2 or 3");
         }
 
@@ -85,18 +100,6 @@ public class MainMenu {
         });
 
         em.clear();
-    }
-
-    private Location getDepot() {
-        String locationQuery = "SELECT l from Location l WHERE l.name = 'Depot'";
-        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
-        return jpqlQueryLocation.getSingleResult();
-    }
-
-    private List<Location> findAllLocations() {
-        String locationQuery = "SELECT l from Location l";
-        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
-        return jpqlQueryLocation.getResultList();
     }
 
     private boolean proceed() {

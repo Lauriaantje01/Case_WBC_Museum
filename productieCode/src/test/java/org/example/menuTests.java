@@ -1,3 +1,5 @@
+package org.example;
+
 import org.example.models.example.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,8 +8,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class menuTests {
 
@@ -60,14 +65,23 @@ public class menuTests {
 
                 System.out.println("What is the year of the artwork?");
                 inputYear = Integer.parseInt(scanner.nextLine());
+                boolean yearInput = false;
 
+                while (!(yearInput)) {
+                    if (inputYear > LocalDate.now().getYear()) {
+                        System.out.println("Was this artwork made in the future? Try again");
+                        inputYear = Integer.parseInt(scanner.nextLine());
+                    } else {
+                        yearInput = true;
+                    }
+                }
 
                 System.out.println(inputTitle + " created in " + inputYear + ". What is the name of the artist?");
                 inputArtistName = scanner.nextLine();
                 allInputDone = true;
             } catch (java.lang.NumberFormatException e) {
                 System.out.println("Make sure you only use numbers for the year of the artwork, please type again");
-            }catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println("Something went wrong with the input, please try again.");
             }
         }
@@ -94,7 +108,7 @@ public class menuTests {
     @Test
     @DisplayName("Proceed method, a method that gives back a boolean whether the user wants to proceed or not")
     void testProceedMethod() {
-    boolean proceed = proceed();
+        boolean proceed = proceed();
         System.out.println(proceed);
     }
 
@@ -115,6 +129,51 @@ public class menuTests {
             answerProceed = scanner.nextLine();
         }
         return false;
+    }
+
+    @Test
+    @DisplayName("Finding a way to prevent that the same artist is created.")
+    void findArtistName() {
+        createMuseum();
+        String inputArtistName = "Ernst";
+
+        String queryString = "SELECT a FROM Artist a where a.name LIKE :name";
+        TypedQuery<Artist> query = em.createQuery(queryString, Artist.class);
+        query.setParameter("name", "%" + inputArtistName + "%");
+        Artist artist = query.getSingleResult();
+
+        System.out.println(artist.getName());
+        assertThat(artist.getName()).isEqualTo("Max Ernst");
+    }
+
+    @Test
+    @DisplayName("Same query as test above, but added in the method which will be used in the menu")
+    Artist inMethodFindPreviousArtist() {
+        boolean allInputDone = false;
+        String inputArtistName = "";
+
+        while (allInputDone == false) {
+            try {
+                System.out.println("What is the name of the artist?");
+                inputArtistName = scanner.nextLine();
+
+                Artist duplicateArtist = findDuplicateArtist(inputArtistName);
+
+                System.out.println("Artist with the following name already exists: " + duplicateArtist.getName() +
+                        "\nDo you want to add the artwork to this existing artist?" +
+                        "\nType 1 to add to existing artist, Type 2 to create a new artist with the same name");
+                if (proceed1or2() == true) {
+                    return duplicateArtist;
+                }
+
+            } catch (javax.persistence.NoResultException e) {
+                allInputDone = true;
+
+            } catch (Exception e) {
+                System.out.println("Something went wrong with the input, please try again.");
+            }
+        }
+        return new Artist(inputArtistName);
     }
 
 
@@ -156,5 +215,28 @@ public class menuTests {
         });
 
         em.clear();
+    }
+
+    private Artist findDuplicateArtist(String inputName) {
+        String queryString = "SELECT a FROM Artist a where a.name LIKE :name";
+        TypedQuery<Artist> query = em.createQuery(queryString, Artist.class);
+        query.setParameter("name", "%" + inputName + "%");
+        return query.getSingleResult();
+    }
+
+    private boolean proceed1or2() {
+        String answerProceed = scanner.nextLine();
+        boolean whileSwitch = false;
+
+        while (!(whileSwitch)) {
+            if (answerProceed.equals("1")) {
+                return true;
+            }
+            if (answerProceed.equals("2")) {
+                return false;
+            } else System.out.println("Try again typing either 1 or 2");
+            answerProceed = scanner.nextLine();
+        }
+        return false;
     }
 }

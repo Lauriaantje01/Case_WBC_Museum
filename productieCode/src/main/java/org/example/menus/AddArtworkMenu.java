@@ -1,31 +1,33 @@
 package org.example.menus;
 
-import org.example.models.example.Artist;
-import org.example.models.example.Artwork;
-import org.example.models.example.Location;
+import org.example.models.example.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
 public class AddArtworkMenu {
 
-    String persistenceUnitName = "jpa-hiber-postgres-pu";
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName);
-    EntityManager em = emf.createEntityManager();
+    EntityManagerFactory emf;
+    EntityManager em;
     Scanner scanner = new Scanner(System.in);
+
+    public AddArtworkMenu(EntityManagerFactory emf) {
+        this.emf = emf;
+        em = emf.createEntityManager();
+    }
 
     void startAddArtworkMenu() {
         Artist artist = createArtist();
         Artwork artwork = createArtwork(artist);
 
         System.out.println("\nThe following artwork has been created: " + artwork.toString() + " The work will be placed" +
-                "by default in the depot");
+                "by default in the depot. Type 1 to proceed, or 2 to return to main menu");
 
-        if (proceed()) {
+        if (proceed1or2()) {
             executeTransaction(em -> {
                 em.persist(artist);
                 em.persist(artwork);
@@ -35,7 +37,6 @@ public class AddArtworkMenu {
         } else System.out.println("Mission aborted");
 
         System.out.println("You are now returned to the main menu\n\n\n\n\n\n");
-
     }
 
     private Artwork createArtwork(Artist artist) {
@@ -52,6 +53,16 @@ public class AddArtworkMenu {
 
                 System.out.println("What is the year of the artwork?");
                 inputYear = Integer.parseInt(scanner.nextLine());
+                boolean yearInput = false;
+
+                while (!(yearInput)) {
+                    if (inputYear > LocalDate.now().getYear()) {
+                        System.out.println("Was this artwork made in the future? Try again");
+                        inputYear = Integer.parseInt(scanner.nextLine());
+                    } else {
+                        yearInput = true;
+                    }
+                }
 
                 System.out.println(inputTitle + " created in " + inputYear + " by " + artist.getName());
                 allInputDone = true;
@@ -61,7 +72,6 @@ public class AddArtworkMenu {
                 System.out.println("Something went wrong with the input, please try again.");
             }
         }
-
         return new Artwork(inputTitle, artist, inputYear, getDepot());
     }
 
@@ -73,7 +83,19 @@ public class AddArtworkMenu {
             try {
                 System.out.println("What is the name of the artist?");
                 inputArtistName = scanner.nextLine();
+
+                Artist duplicateArtist = findDuplicateArtist(inputArtistName);
+
+                System.out.println("Artist with the following name already exists: " + duplicateArtist.getName() +
+                        "\nDo you want to add the artwork to this existing artist?" +
+                        "\nType 1 to add to existing artist, Type 2 to create a new artist with the same name");
+                if (proceed1or2() == true) {
+                    return duplicateArtist;
+                } else allInputDone = true;
+
+            } catch (javax.persistence.NoResultException e) {
                 allInputDone = true;
+
             } catch (Exception e) {
                 System.out.println("Something went wrong with the input, please try again.");
             }
@@ -92,6 +114,7 @@ public class AddArtworkMenu {
             }
             throw new RuntimeException("Something went wrong in the test", e);
         }
+        em.clear();
     }
 
     private Location getDepot() {
@@ -100,8 +123,14 @@ public class AddArtworkMenu {
         return jpqlQueryLocation.getSingleResult();
     }
 
-    private boolean proceed() {
-        System.out.println("Type 1 to proceed or 2 to exit");
+    private Artist findDuplicateArtist(String inputName) {
+        String queryString = "SELECT a FROM Artist a where a.name LIKE :name";
+        TypedQuery<Artist> query = em.createQuery(queryString, Artist.class);
+        query.setParameter("name", "%" + inputName + "%");
+        return query.getSingleResult();
+    }
+
+    private boolean proceed1or2() {
         String answerProceed = scanner.nextLine();
         boolean whileSwitch = false;
 
