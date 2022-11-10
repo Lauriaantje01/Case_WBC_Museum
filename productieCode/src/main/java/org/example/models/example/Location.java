@@ -13,6 +13,8 @@ public abstract class Location {
     @SequenceGenerator(sequenceName = "location_id", name = "location_id")
     private Long id;
 
+    String name;
+
     public Long getId() {
         return id;
     }

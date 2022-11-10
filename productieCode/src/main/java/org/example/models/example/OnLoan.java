@@ -11,6 +11,8 @@ public class OnLoan extends Location {
     @OneToMany (mappedBy = "location")
     private List<Artwork> artworks = new ArrayList<>();
 
+    String name = "On Loan";
+
     @Override
     boolean add(Artwork a) {
         if (artworks.contains(a)) {

@@ -20,6 +20,8 @@ public class Depot extends Location {
         return true;
     }
 
+    String name = "Depot";
+
     @Override
     public boolean remove(Artwork a) {
         artworks.remove(a);

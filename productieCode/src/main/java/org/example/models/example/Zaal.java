@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 public class Zaal extends Location {
 
+    String name = "Zaal";
     @OneToMany(mappedBy = "location")
     private List<Artwork> artworks = new ArrayList<>();
 

@@ -1,9 +1,13 @@
 package org.example.menus;
 
+import org.example.models.example.*;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -11,12 +15,15 @@ public class MainMenu {
     String persistenceUnitName = "jpa-hiber-postgres-pu";
     EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnitName);
     EntityManager em = emf.createEntityManager();
+
+    AddArtworkMenu addArtworkMenu = new AddArtworkMenu();
     Scanner scanner = new Scanner(System.in);
 
     public MainMenu() {
     }
 
     public void startMenu() {
+        createMuseum();
         System.out.println("Welcome to the pilot of the Walter Bosch Complex museum admin system. \n\n");
 
         int input;
@@ -30,46 +37,14 @@ public class MainMenu {
 
             if (input == 1) {
                 System.out.println("move to current collection menu");
-            }
-            else if (input ==2) {
-                System.out.println("move to add artwork menu");
-            }
-            else if (input ==3) {
+            } else if (input == 2) {
+                addArtworkMenu.startAddArtworkMenu();
+            } else if (input == 3) {
                 proceed = false;
-            }
-            else System.out.println("Try again typing either 1, 2 or 3");
+            } else System.out.println("Try again typing either 1, 2 or 3");
         }
 
         System.out.println("goodbye!");
-    }
-
-    private void addArtworkMenu() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Type the title of the artwork");
-        String inputTitle = scanner.nextLine();
-
-        System.out.println("What is the year of the artwork?");
-        int inputYear = Integer.parseInt(scanner.nextLine());
-
-        System.out.println(inputTitle + " created in " + inputYear +". What is the name of the artist?");
-        String inputArtistName = scanner.nextLine();
-
-        Artist artist = new Artist (inputArtistName);
-        Artwork artwork= new Artwork(inputTitle, artist, inputYear);
-
-        System.out.println("The following artwork has been created: " + artwork.toString() + "Type 1 to proceed");
-        String answerProceed = scanner.nextLine();
-        if (answerProceed.equals("1")) {
-            executeTransaction(em -> {
-                em.persist(artist);
-                em.persist(artwork);
-            });
-            System.out.println("You added the following object to the database: \n" +
-                    artwork.toString());
-        }
-        else System.out.println("Mission aborted");
-    }
     }
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
@@ -83,6 +58,45 @@ public class MainMenu {
             }
             throw new RuntimeException("Something went wrong in the test", e);
         }
+    }
+
+    private void createMuseum() {
+        Location depot = new Depot();
+        Location zaal = new Zaal();
+        Location onLoan = new OnLoan();
+
+        Artist maxErnst = new Artist("Max Ernst", 1891, 1976);
+        Artwork artwork1 = new Artwork("Europe after the Rain II", maxErnst, 1941, zaal);
+        Artwork artwork2 = new Artwork("Blue Forest", maxErnst, 1931, depot);
+        Artwork artwork3 = new Artwork("Two Children Are Threatened by a Nightingale", maxErnst, 1924, depot);
+        Artist brancusi = new Artist("Constantin Brancusi", 1876, 1957);
+        Artwork artwork4 = new Artwork("The Fish", brancusi, 1924, depot);
+
+        executeTransaction(em -> {
+            em.persist(maxErnst);
+            em.persist(artwork1);
+            em.persist(artwork2);
+            em.persist(artwork3);
+            em.persist(brancusi);
+            em.persist(artwork4);
+            em.persist(zaal);
+            em.persist(depot);
+            em.persist(onLoan);
+        });
+
+        em.clear();
+    }
+
+    private Location getDepot() {
+        String locationQuery = "SELECT l from Location l WHERE l.name = 'Depot'";
+        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
+        return jpqlQueryLocation.getSingleResult();
+    }
+
+    private List<Location> findAllLocations() {
+        String locationQuery = "SELECT l from Location l";
+        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
+        return jpqlQueryLocation.getResultList();
     }
 
 }
