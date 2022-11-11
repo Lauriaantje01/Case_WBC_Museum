@@ -32,26 +32,34 @@ public class CollectionMenu {
         System.out.println("What would you like to see?");
         printRelevantArtworksToConsole();
 
-        System.out.println("Type 1 If you would you like to update one of these works" +
-                "\n Type 2 to show another selection of works" +
-                "\n Type 0 to return to the main menu");
+        System.out.println("\nType 1 If you would you like to update one of these works" +
+                "\nType 2 to show another selection of works" +
+                "\nType 0 to return to the main menu");
 
         String userInput = scanner.nextLine();
         boolean proceed = true;
 
         while (proceed) {
             if (userInput.equals("1")) {
-                Artwork artworkToChange = queryWithId();
-                changeLocation(artworkToChange);
+                try {
+                    Artwork artworkToChange = findArtworkWithID();
+                    changeLocation(artworkToChange);
+                } catch (NoResultException e) {
+                    proceed = false;
+                }
+
                 proceed = false;
             } else if (userInput.equals("2")) {
                 startCollectionMenu();
                 proceed = false;
             } else if (userInput.equals("0")) {
                 proceed = false;
-            } else System.out.println("Try again typing either 1, 2 or 0");
+            } else {
+                System.out.println("Try again typing either 1, 2 or 0");
+                userInput = scanner.nextLine();
+            }
         }
-        System.out.println("You return to the main menu\n\n\n\n\n\n");
+        System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
     }
 
     //    Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
@@ -132,24 +140,30 @@ public class CollectionMenu {
     }
 
     // Add catch for no result exception => try again or return to collection menu.
-    private Artwork queryWithId() {
-        System.out.println("Type ID number of artwork you want to change");
+    private Artwork findArtworkWithID() {
+        System.out.println("\nType ID number of artwork you want to change (or 0 to return to the main menu)");
+        Long inputID = getValidIDLong();
 
-        Long inputID = Long.parseLong(scanner.nextLine());
         boolean proceed = true;
+        Artwork foundArtwork = null;
 
         while (proceed) {
             if (inputID == 0) {
                 throw new NoResultException();
-            try {
-                Artwork foundArtwork = em.find(Artwork.class, inputID);
-                proceed = false;
-            } catch (NoResultException e) {
-                System.out.println("Artwork not found, try again or type 0 to exit the menu");
+            } else {
+                try {
+                    foundArtwork = em.find(Artwork.class, inputID);
+                    if (foundArtwork == null) {
+                        throw new NoResultException();
+                    } else
+                    System.out.println(foundArtwork);
+                    return foundArtwork;
+                } catch (NoResultException e) {
+                    System.out.println("Artwork not found, try again (or 0 to return to the main menu)");
+                    inputID = getValidIDLong();
+                }
             }
         }
-        System.out.println(foundArtwork);
-
         return foundArtwork;
     }
 
@@ -213,7 +227,25 @@ public class CollectionMenu {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            } else System.out.println("Try again typing either 1, 2, 3 or 4");
+            } else {
+                System.out.println("Try again typing either 1, 2, 3 or 4");
+                userInput = scanner.nextLine();
+            }
         }
+    }
+
+    private Long getValidIDLong() {
+        boolean validID = true;
+        Long inputID = 0L;
+
+        while (validID)
+            try {
+                inputID = Long.parseLong(scanner.nextLine());
+                validID = false;
+            } catch (NumberFormatException e) {
+                System.out.println("Try again, that was not a number");
+            }
+
+        return inputID;
     }
 }
