@@ -93,7 +93,7 @@ public class CollectionMenu {
             moveArtworkOnLoan(artwork, locationInput);
 
         } else {
-            System.out.println("Something went wrong, contact administrator or try again.");
+            System.out.println("\"Try again typing either 1, 2 or 3");
         }
     }
 
@@ -175,13 +175,11 @@ public class CollectionMenu {
 
     private void printRelevantArtworksToConsole() {
 //        Mapping out the options:
-        List<Location> locations = findAllLocations();
-        int counterOtherOptions = 0;
-        for (Location l : findAllLocations()) {
-            counterOtherOptions += 1;
-            System.out.println(l.getId() + ") All artworks at " + l.toString());
-        }
-        System.out.println("\n*) All artworks in the collection");
+        System.out.println("\n1) All artworks in the collection" +
+                "\n2) All artworks at " + findAllLocations().get(0).toString() +
+                "\n3) All artworks at " + findAllLocations().get(1).toString() +
+                "\n4) All artworks at " + findAllLocations().get(2).toString());
+
 
         String userInput = scanner.nextLine();
         boolean proceed = true;
@@ -191,23 +189,23 @@ public class CollectionMenu {
         // Also would presume here that the userinput equals the ID of the location, this can be mapped better.
 
         while (proceed) {
-            if (userInput.equals("*")) {
+            if (userInput.equals("1")) {
                 List<Artwork> artwork = findAllArtworks();
                 for (Artwork a : artwork) {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            } else if (userInput.equals("1")) {
-                printArtworksAtLocation(locations, 0);
-                proceed = false;
             } else if (userInput.equals("2")) {
-                printArtworksAtLocation(locations, 1);
+                printArtworksAtLocation( 0);
                 proceed = false;
             } else if (userInput.equals("3")) {
-                printArtworksAtLocation(locations, 2);
+                printArtworksAtLocation(1);
+                proceed = false;
+            } else if (userInput.equals("4")) {
+                printArtworksAtLocation(2);
                 proceed = false;
             } else {
-                System.out.println("Try again typing either 1, 2, 3 or *");
+                System.out.println("Try again typing either 1, 2, 3 or 4");
                 userInput = scanner.nextLine();
             }
         }
@@ -240,7 +238,8 @@ public class CollectionMenu {
         return jpqlQueryLocation.getResultList();
     }
 
-    private void printArtworksAtLocation(List<Location> locations, int index) {
+    private void printArtworksAtLocation(int index) {
+        var locations = findAllLocations();
         Location location = locations.get(index);
         List<Artwork> artwork = location.getArtworks();
         System.out.println("The following artworks are at " + location.toString());
