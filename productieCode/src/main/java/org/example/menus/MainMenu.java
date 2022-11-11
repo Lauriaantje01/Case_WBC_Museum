@@ -36,24 +36,22 @@ public class MainMenu {
         createMuseum();
         em.close(); // Presume that from now one the menu does not need to interact with the museum objects anymore.
 
-        System.out.println("Welcome to the pilot of the Walter Bosch Complex museum admin system. \n\n");
-
-        int input;
         boolean proceed = true;
 
-        while (proceed) {
-            System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
-                    "Type 2 if you want to add a new artwork to the collection.\n" +
-                    "Type 0 if you want to exit the program");
-            input = Integer.parseInt(scanner.nextLine());
+        System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
+                "Type 2 if you want to add a new artwork to the collection.\n" +
+                "Type 0 if you want to exit the program");
 
-            if (input == 1) {
+        while (proceed) {
+            String input = scanner.nextLine();
+
+            if (input.equals("1")) {
                 collectionMenu.startCollectionMenu();
 
-            } else if (input == 2) {
+            } else if (input.equals("2")) {
                 addArtworkMenu.startAddArtworkMenu();
 
-            } else if (input == 0) {
+            } else if (input.equals("0")) {
                 proceed = false;
 
             } else System.out.println("Try again typing either 1, 2 or 3");

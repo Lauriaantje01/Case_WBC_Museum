@@ -29,7 +29,7 @@ public class CollectionMenu {
 
     public void startCollectionMenu() {
         // Could add option to look at artists instead for updates....
-        System.out.println("What would you like to see?");
+        System.out.println("\n\n\n\n\nWhat would you like to see?");
         printSelectionArtworksToConsole();
 
         System.out.println("\nType 1 If you would you like to update one of these works" +
@@ -47,32 +47,31 @@ public class CollectionMenu {
                 } catch (NoResultException e) {
                     proceed = false;
                 }
-
+                System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
                 proceed = false;
             } else if (userInput.equals("2")) {
                 startCollectionMenu();
                 proceed = false;
             } else if (userInput.equals("0")) {
                 proceed = false;
+                System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
             } else {
                 System.out.println("Try again typing either 1, 2 or 0");
                 userInput = scanner.nextLine();
             }
         }
-        System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
     }
 
 /*       Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
    Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
   their own persist statements.
-
  */
 
     private void changeLocation(Artwork artwork) {
         List<Location> locations = findAllLocations();
 
         // Act
-        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
+        System.out.println("\n\n\n\n\nType 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
                 + locations.get(1) + " , type 3 when the artwork goes on loan");
 
         try {
@@ -182,7 +181,7 @@ public class CollectionMenu {
 
     private void printSelectionArtworksToConsole() {
 //        Mapping out the options:
-        System.out.println("\n1) All artworks in the collection" +
+        System.out.println("1) All artworks in the collection" +
                 "\n2) All artworks at " + findAllLocations().get(0).toString() +
                 "\n3) All artworks at " + findAllLocations().get(1).toString() +
                 "\n4) All artworks at " + findAllLocations().get(2).toString());
@@ -248,11 +247,12 @@ public class CollectionMenu {
     private void printArtworksAtLocation(int index) {
         var locations = findAllLocations();
         Location location = locations.get(index);
+
         List<Artwork> artwork = location.getArtworks();
-        System.out.println("The following artworks are at " + location.toString());
+        System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are at " + location.toString());
 
         for (Artwork a : artwork) {
-            System.out.println(a.toString());
+            System.out.println("ID: " + a.getId() + " " + a.toString());
         }
 
     }

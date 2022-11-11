@@ -22,6 +22,7 @@ public class AddArtworkMenu {
     }
 
     void startAddArtworkMenu() {
+        System.out.println("\n\n\n\n\nWe start with the artist of the new artwork");
         Artist artist = createArtist();
         Artwork artwork = createArtwork(artist);
 
@@ -35,10 +36,10 @@ public class AddArtworkMenu {
                 em.persist(artist);
                 em.persist(artwork);
             });
-            System.out.println("\nYou added the following object to the database: \n" +
+            System.out.println("\n\n\n\n\n\n\n\n\n\nYou added the following object to the database: \n" +
                     artwork.toString());
-        } else
-            System.out.println("You are now returned to the main menu\n\n\n\n\n\n\n\n\n");
+        }
+        System.out.println("\n\n\n\n\n\n\n\n\n\nYou are now returned to the main menu\n\n\n\n\n\n\n\n\n");
     }
 
     private Artwork createArtwork(Artist artist) {
@@ -75,7 +76,7 @@ public class AddArtworkMenu {
         return new Artwork(inputTitle, artist, inputYear, getDepot());
     }
 
-//    Note that the method findDuplicateArtist might send a NoResultException. The createArtist method catches this
+    //    Note that the method findDuplicateArtist might send a NoResultException. The createArtist method catches this
 //    exception and continues to run the program, thus accepting that the artist is not yet in the database.
     private Artist createArtist() {
         boolean allInputDone = false;
