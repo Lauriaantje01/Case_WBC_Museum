@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -24,8 +25,10 @@ public class AddArtworkMenu {
         Artist artist = createArtist();
         Artwork artwork = createArtwork(artist);
 
-        System.out.println("\nThe following artwork has been created: " + artwork.toString() + " The work will be placed" +
-                "by default in the depot. Type 1 to proceed, or 2 to return to main menu");
+        System.out.println("\nThe following artwork has been created: " + artwork.toString() + "\nThe work has been " +
+                "placed by default in the depot.\n" +
+                "Type 1 to save the artwork, or 0 to return to main menu");
+
 
         if (proceed1or2()) {
             executeTransaction(em -> {
@@ -34,9 +37,8 @@ public class AddArtworkMenu {
             });
             System.out.println("\nYou added the following object to the database: \n" +
                     artwork.toString());
-        } else System.out.println("Mission aborted");
-
-        System.out.println("You are now returned to the main menu\n\n\n\n\n\n");
+        } else
+            System.out.println("You are now returned to the main menu\n\n\n\n\n\n\n\n\n");
     }
 
     private Artwork createArtwork(Artist artist) {
@@ -63,8 +65,6 @@ public class AddArtworkMenu {
                         yearInput = true;
                     }
                 }
-
-                System.out.println(inputTitle + " created in " + inputYear + " by " + artist.getName());
                 allInputDone = true;
             } catch (java.lang.NumberFormatException e) {
                 System.out.println("Make sure you only use numbers for the year of the artwork, please type again");
@@ -75,6 +75,8 @@ public class AddArtworkMenu {
         return new Artwork(inputTitle, artist, inputYear, getDepot());
     }
 
+//    Note that the method findDuplicateArtist might send a NoResultException. The createArtist method catches this
+//    exception and continues to run the program, thus accepting that the artist is not yet in the database.
     private Artist createArtist() {
         boolean allInputDone = false;
         String inputArtistName = "";
@@ -124,10 +126,20 @@ public class AddArtworkMenu {
     }
 
     private Artist findDuplicateArtist(String inputName) {
-        String queryString = "SELECT a FROM Artist a where a.name LIKE :name";
-        TypedQuery<Artist> query = em.createQuery(queryString, Artist.class);
-        query.setParameter("name", "%" + inputName + "%");
-        return query.getSingleResult();
+        String queryAllNamesString = "SELECT a.name FROM Artist a";
+        TypedQuery<String> queryAllNames = em.createQuery(queryAllNamesString, String.class);
+        List<String> namesArtists = queryAllNames.getResultList();
+        String duplicateName = "XXX";
+        for (String name : namesArtists) {
+            if (name.toUpperCase().contains(inputName.toUpperCase())) {
+                duplicateName = name;
+            }
+        }
+
+        String queryDuplicateString = "SELECT a FROM Artist a where a.name LIKE :name";
+        TypedQuery<Artist> queryDuplicate = em.createQuery(queryDuplicateString, Artist.class);
+        queryDuplicate.setParameter("name", duplicateName);
+        return queryDuplicate.getSingleResult();
     }
 
     private boolean proceed1or2() {
@@ -138,9 +150,9 @@ public class AddArtworkMenu {
             if (answerProceed.equals("1")) {
                 return true;
             }
-            if (answerProceed.equals("2")) {
+            if (answerProceed.equals("0")) {
                 return false;
-            } else System.out.println("Try again typing either 1 or 2");
+            } else System.out.println("Try again typing either 1 or 0");
             answerProceed = scanner.nextLine();
         }
         return false;

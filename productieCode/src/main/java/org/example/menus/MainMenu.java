@@ -42,9 +42,9 @@ public class MainMenu {
         boolean proceed = true;
 
         while (proceed) {
-            System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection? \n" +
+            System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
                     "Type 2 if you want to add a new artwork to the collection.\n" +
-                    "Type 3 if you want to exit the program");
+                    "Type 0 if you want to exit the program");
             input = Integer.parseInt(scanner.nextLine());
 
             if (input == 1) {
@@ -53,7 +53,7 @@ public class MainMenu {
             } else if (input == 2) {
                 addArtworkMenu.startAddArtworkMenu();
 
-            } else if (input == 3) {
+            } else if (input == 0) {
                 proceed = false;
 
             } else System.out.println("Try again typing either 1, 2 or 3");
@@ -100,23 +100,6 @@ public class MainMenu {
         });
 
         em.clear();
-    }
-
-    private boolean proceed() {
-        System.out.println("Type 1 to proceed or 2 to exit");
-        String answerProceed = scanner.nextLine();
-        boolean whileSwitch = false;
-
-        while (!(whileSwitch)) {
-            if (answerProceed.equals("1")) {
-                return true;
-            }
-            if (answerProceed.equals("2")) {
-                return false;
-            } else System.out.println("Try again typing either 1 or 2");
-            answerProceed = scanner.nextLine();
-        }
-        return false;
     }
 
 }

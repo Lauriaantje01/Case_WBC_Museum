@@ -9,6 +9,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -148,7 +149,7 @@ public class menuTests {
 
     @Test
     @DisplayName("Same query as test above, but added in the method which will be used in the menu")
-    Artist inMethodFindPreviousArtist() {
+    Artist inMethodFindDuplicateArtist() {
         boolean allInputDone = false;
         String inputArtistName = "";
 
@@ -174,6 +175,18 @@ public class menuTests {
             }
         }
         return new Artist(inputArtistName);
+    }
+
+    @Test
+    @DisplayName("Newly created find duplicate artist where we also take into account capitol letters")
+    void testDuplicate2Method() {
+        createMuseum();
+        String inputArtistName = "constantin";
+
+        Artist duplicateArtist = findDuplicateArtist2(inputArtistName);
+
+        System.out.println(duplicateArtist.getName());
+        assertThat(duplicateArtist.getName()).isEqualTo("Constantin Brancusi");
     }
 
 
@@ -222,6 +235,23 @@ public class menuTests {
         TypedQuery<Artist> query = em.createQuery(queryString, Artist.class);
         query.setParameter("name", "%" + inputName + "%");
         return query.getSingleResult();
+    }
+
+    private Artist findDuplicateArtist2(String inputName) {
+        String queryAllNamesString = "SELECT a.name FROM Artist a";
+        TypedQuery<String> queryAllNames = em.createQuery(queryAllNamesString, String.class);
+        List<String> namesArtists = queryAllNames.getResultList();
+        String duplicateName = "XXXXXXX";
+        for (String name : namesArtists) {
+            if (name.toUpperCase().contains(inputName.toUpperCase())) {
+                duplicateName = name;
+            }
+        }
+
+        String queryDuplicateString = "SELECT a FROM Artist a where a.name LIKE :name";
+        TypedQuery<Artist> queryDuplicate = em.createQuery(queryDuplicateString, Artist.class);
+        queryDuplicate.setParameter("name", duplicateName);
+        return queryDuplicate.getSingleResult();
     }
 
     private boolean proceed1or2() {
