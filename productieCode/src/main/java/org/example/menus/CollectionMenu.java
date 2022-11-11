@@ -32,7 +32,7 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\nWhat would you like to see?");
         printSelectionArtworksToConsole();
 
-        System.out.println("\nType 1 If you would you like to update one of these works" +
+        System.out.println("\nType 1 If you would like to update one of these works" +
                 "\nType 2 to show another selection of works" +
                 "\nType 0 to return to the main menu");
 
@@ -47,14 +47,14 @@ public class CollectionMenu {
                 } catch (NoResultException e) {
                     proceed = false;
                 }
-                System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
+                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
                 proceed = false;
             } else if (userInput.equals("2")) {
                 startCollectionMenu();
                 proceed = false;
             } else if (userInput.equals("0")) {
                 proceed = false;
-                System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
+                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
             } else {
                 System.out.println("Try again typing either 1, 2 or 0");
                 userInput = scanner.nextLine();
@@ -66,9 +66,9 @@ public class CollectionMenu {
    Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
   their own persist statements.
  */
-
     private void changeLocation(Artwork artwork) {
         List<Location> locations = findAllLocations();
+        System.out.println("Selected artwork: " + artwork.toString());
 
         // Act
         System.out.println("\n\n\n\n\nType 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
@@ -76,47 +76,34 @@ public class CollectionMenu {
 
         try {
             int userInput = Integer.parseInt(scanner.nextLine());
+            Location locationInput = null;
 
             if (userInput > 0 && userInput <= 3) {
-                Location locationInput = null;
-                if (userInput == 1) {
-                    locationInput = locations.get(0);
-                }
-                if (userInput == 2) {
-                    locationInput = locations.get(1);
-                }
                 if (userInput == 3) {
                     locationInput = locations.get(2);
+                    moveArtworkOnLoan(artwork, locationInput);
                 }
-
-                artwork.moveTo(locationInput);
-                executeTransaction(em -> {
-                    em.persist(artwork);
-                });
+                else {
+                    if (userInput == 1) {
+                        locationInput = locations.get(0);
+                    }
+                    if (userInput == 2) {
+                        locationInput = locations.get(1);
+                    }
+                    artwork.moveTo(locationInput);
+                    executeTransaction(em -> {
+                        em.persist(artwork);
+                    });
+                }
                 em.clear();
                 System.out.println(artwork.toString() + " was succesfully moved to " + locationInput.toString());
+            } else System.out.println("\"Try again typing either 1, 2 or 3");
 
-            }
         } catch (NumberFormatException e) {
             System.out.println("\"Try again typing either 1, 2 or 3");
 
         }
-    }
 
-    private boolean proceed1or2() {
-        String answerProceed = scanner.nextLine();
-        boolean whileSwitch = false;
-
-        while (!(whileSwitch)) {
-            if (answerProceed.equals("1")) {
-                return true;
-            }
-            if (answerProceed.equals("2")) {
-                return false;
-            } else System.out.println("Try again typing either 1 or 2");
-            answerProceed = scanner.nextLine();
-        }
-        return false;
     }
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
@@ -150,7 +137,6 @@ public class CollectionMenu {
                     if (foundArtwork == null) {
                         throw new NoResultException();
                     } else
-                        System.out.println(foundArtwork);
                     return foundArtwork;
                 } catch (NoResultException e) {
                     System.out.println("Artwork not found, try again (or 0 to return to the main menu)");
@@ -166,7 +152,7 @@ public class CollectionMenu {
                 "What is the address?");
         Scanner scanner = new Scanner(System.in);
         String address = scanner.nextLine();
-        System.out.println(artwork + " will go on loan at the following address: " + address);
+        System.out.println("\n\n" + artwork + " will go on loan at the following address: " + address);
 
         BruikleenContract bruikleenContract = new BruikleenContract(artwork, address);
         artwork.setBruikleenContract(bruikleenContract);
@@ -198,7 +184,7 @@ public class CollectionMenu {
             if (userInput.equals("1")) {
                 List<Artwork> artwork = findAllArtworks();
                 for (Artwork a : artwork) {
-                    System.out.println(a.getId() + " " + a.toString());
+                    System.out.println("ID: " + a.getId() + " " + a.toString());
                 }
                 proceed = false;
             } else if (userInput.equals("2")) {

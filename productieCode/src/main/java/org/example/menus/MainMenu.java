@@ -38,11 +38,10 @@ public class MainMenu {
 
         boolean proceed = true;
 
-        System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
-                "Type 2 if you want to add a new artwork to the collection.\n" +
-                "Type 0 if you want to exit the program");
-
         while (proceed) {
+            System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
+                    "Type 2 if you want to add a new artwork to the collection.\n" +
+                    "Type 0 if you want to exit the program");
             String input = scanner.nextLine();
 
             if (input.equals("1")) {

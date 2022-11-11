@@ -39,7 +39,7 @@ public class AddArtworkMenu {
             System.out.println("\n\n\n\n\n\n\n\n\n\nYou added the following object to the database: \n" +
                     artwork.toString());
         }
-        System.out.println("\n\n\n\n\n\n\n\n\n\nYou are now returned to the main menu\n\n\n\n\n\n\n\n\n");
+        System.out.println("You are now returned to the main menu\n\n\n\n\n\n\n\n\n");
     }
 
     private Artwork createArtwork(Artist artist) {
