@@ -30,7 +30,7 @@ public class CollectionMenu {
     public void startCollectionMenu() {
         // Could add option to look at artists instead for updates....
         System.out.println("What would you like to see?");
-        printRelevantArtworksToConsole();
+        printSelectionArtworksToConsole();
 
         System.out.println("\nType 1 If you would you like to update one of these works" +
                 "\nType 2 to show another selection of works" +
@@ -62,38 +62,45 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\n\nYou return to the main menu\n\n\n\n\n\n\n\n");
     }
 
-    //    Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
-//    Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
-//    their own persist statements.
+/*       Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
+   Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
+  their own persist statements.
+
+ */
+
     private void changeLocation(Artwork artwork) {
         List<Location> locations = findAllLocations();
-        Location locationInput = null;
 
         // Act
         System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
                 + locations.get(1) + " , type 3 when the artwork goes on loan");
-        String userInput = scanner.nextLine();
 
-        if (userInput.equals("1")) {
-            locationInput = locations.get(0);
-            artwork.moveTo(locations.get(0));
-            executeTransaction(em -> {
-                em.persist(artwork);
-            });
+        try {
+            int userInput = Integer.parseInt(scanner.nextLine());
 
-        } else if (userInput.equals("2")) {
-            locationInput = locations.get(1);
-            artwork.moveTo(locations.get(1));
-            executeTransaction(em -> {
-                em.persist(artwork);
-            });
+            if (userInput > 0 && userInput <= 3) {
+                Location locationInput = null;
+                if (userInput == 1) {
+                    locationInput = locations.get(0);
+                }
+                if (userInput == 2) {
+                    locationInput = locations.get(1);
+                }
+                if (userInput == 3) {
+                    locationInput = locations.get(2);
+                }
 
-        } else if (userInput.equals("3")) {
-            locationInput = locations.get(2);
-            moveArtworkOnLoan(artwork, locationInput);
+                artwork.moveTo(locationInput);
+                executeTransaction(em -> {
+                    em.persist(artwork);
+                });
+                em.clear();
+                System.out.println(artwork.toString() + " was succesfully moved to " + locationInput.toString());
 
-        } else {
+            }
+        } catch (NumberFormatException e) {
             System.out.println("\"Try again typing either 1, 2 or 3");
+
         }
     }
 
@@ -173,7 +180,7 @@ public class CollectionMenu {
         return successMove;
     }
 
-    private void printRelevantArtworksToConsole() {
+    private void printSelectionArtworksToConsole() {
 //        Mapping out the options:
         System.out.println("\n1) All artworks in the collection" +
                 "\n2) All artworks at " + findAllLocations().get(0).toString() +
@@ -196,7 +203,7 @@ public class CollectionMenu {
                 }
                 proceed = false;
             } else if (userInput.equals("2")) {
-                printArtworksAtLocation( 0);
+                printArtworksAtLocation(0);
                 proceed = false;
             } else if (userInput.equals("3")) {
                 printArtworksAtLocation(1);
