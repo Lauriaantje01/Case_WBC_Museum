@@ -127,18 +127,6 @@ public class CollectionMenu {
         em.clear();
     }
 
-    private List<Artwork> findAllArtworks() {
-        String queryFindAllArtworks = "SELECT a from Artwork a";
-        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindAllArtworks, Artwork.class);
-        return psqlQuery.getResultList();
-    }
-
-    private List<Location> findAllLocations() {
-        String locationQuery = "SELECT l from Location l";
-        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
-        return jpqlQueryLocation.getResultList();
-    }
-
     // Add catch for no result exception => try again or return to collection menu.
     private Artwork findArtworkWithID() {
         System.out.println("\nType ID number of artwork you want to change (or 0 to return to the main menu)");
@@ -156,7 +144,7 @@ public class CollectionMenu {
                     if (foundArtwork == null) {
                         throw new NoResultException();
                     } else
-                    System.out.println(foundArtwork);
+                        System.out.println(foundArtwork);
                     return foundArtwork;
                 } catch (NoResultException e) {
                     System.out.println("Artwork not found, try again (or 0 to return to the main menu)");
@@ -167,7 +155,7 @@ public class CollectionMenu {
         return foundArtwork;
     }
 
-    private boolean moveArtworkOnLoan(Artwork artwork, Location onloan) {
+    private boolean moveArtworkOnLoan(Artwork artwork, Location onLoan) {
         System.out.println("To move an artwork to on loan, please add the following for the loan contract:" +
                 "What is the address?");
         Scanner scanner = new Scanner(System.in);
@@ -176,7 +164,7 @@ public class CollectionMenu {
 
         BruikleenContract bruikleenContract = new BruikleenContract(artwork, address);
         artwork.setBruikleenContract(bruikleenContract);
-        boolean successMove = artwork.moveTo(onloan);
+        boolean successMove = artwork.moveTo(onLoan);
 
         executeTransaction(em -> {
             em.persist(artwork);
@@ -185,50 +173,41 @@ public class CollectionMenu {
         return successMove;
     }
 
-    private List<Artwork> findArtworksAtLocation(int index) {
-        Location location = findAllLocations().get(index);
-        return location.getArtworks();
-    }
-
     private void printRelevantArtworksToConsole() {
-        System.out.println("\n1) All artworks in the collection" +
-                "\n2) All artworks at " + findAllLocations().get(0).toString() +
-                "\n3) All artworks at " + findAllLocations().get(1).toString() +
-                "\n4) All artworks at " + findAllLocations().get(2).toString());
+//        Mapping out the options:
+        List<Location> locations = findAllLocations();
+        int counterOtherOptions = 0;
+        for (Location l : findAllLocations()) {
+            counterOtherOptions += 1;
+            System.out.println(l.getId() + ") All artworks at " + l.toString());
+        }
+        System.out.println("\n*) All artworks in the collection");
 
         String userInput = scanner.nextLine();
         boolean proceed = true;
 
+        // could make this conditional (the else if statements), but that would mean that the input needs to be
+        // int and not String so the option can be user input == 0 || userinput < locations.size()
+        // Also would presume here that the userinput equals the ID of the location, this can be mapped better.
+
         while (proceed) {
-            if (userInput.equals("1")) {
+            if (userInput.equals("*")) {
                 List<Artwork> artwork = findAllArtworks();
                 for (Artwork a : artwork) {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
+            } else if (userInput.equals("1")) {
+                printArtworksAtLocation(locations, 0);
+                proceed = false;
             } else if (userInput.equals("2")) {
-                List<Artwork> artwork = findArtworksAtLocation(0);
-
-                for (Artwork a : artwork) {
-                    System.out.println(a.getId() + " " + a.toString());
-                }
+                printArtworksAtLocation(locations, 1);
                 proceed = false;
             } else if (userInput.equals("3")) {
-                List<Artwork> artwork = findArtworksAtLocation(1);
-
-                for (Artwork a : artwork) {
-                    System.out.println(a.getId() + " " + a.toString());
-                }
-                proceed = false;
-            } else if (userInput.equals("4")) {
-                List<Artwork> artwork = findArtworksAtLocation(2);
-
-                for (Artwork a : artwork) {
-                    System.out.println(a.getId() + " " + a.toString());
-                }
+                printArtworksAtLocation(locations, 2);
                 proceed = false;
             } else {
-                System.out.println("Try again typing either 1, 2, 3 or 4");
+                System.out.println("Try again typing either 1, 2, 3 or *");
                 userInput = scanner.nextLine();
             }
         }
@@ -248,4 +227,28 @@ public class CollectionMenu {
 
         return inputID;
     }
+
+    private List<Artwork> findAllArtworks() {
+        String queryFindAllArtworks = "SELECT a from Artwork a";
+        TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindAllArtworks, Artwork.class);
+        return psqlQuery.getResultList();
+    }
+
+    private List<Location> findAllLocations() {
+        String locationQuery = "SELECT l from Location l";
+        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
+        return jpqlQueryLocation.getResultList();
+    }
+
+    private void printArtworksAtLocation(List<Location> locations, int index) {
+        Location location = locations.get(index);
+        List<Artwork> artwork = location.getArtworks();
+        System.out.println("The following artworks are at " + location.toString());
+
+        for (Artwork a : artwork) {
+            System.out.println(a.toString());
+        }
+
+    }
+
 }
