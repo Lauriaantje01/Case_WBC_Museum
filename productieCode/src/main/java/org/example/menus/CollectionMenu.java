@@ -1,11 +1,15 @@
 package org.example.menus;
 
+import org.assertj.core.api.LocalDateAssert;
 import org.example.models.example.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -33,10 +37,10 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\nWhat would you like to see?");
         selectArtworksListAndPrintToConsole();
 
-        System.out.println("\nType 1 If you would like to update one of these works" +
-                "\nType 2 If you would like to update all the works in a location" +
-                "\nType 3 to show another selection of works" +
-                "\nType 0 to return to the main menu");
+        System.out.println("\n1) Update one of these works" +
+                "\n2) Show another selection of works" +
+                "\n3) Retrieve loan contract of artworks on loan" +
+                "\n0) Return to the main menu");
 
         String userInput = scanner.nextLine();
         boolean proceed = true;
@@ -52,9 +56,10 @@ public class CollectionMenu {
                 System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
                 proceed = false;
             } else if (userInput.equals("2")) {
-                moveMultipleArtworks();
-            } else if (userInput.equals("3")) {
                 startCollectionMenu();
+                proceed = false;
+            } else if (userInput.equals("3")) {
+                showLoanStatus();
                 proceed = false;
             } else if (userInput.equals("0")) {
                 proceed = false;
@@ -66,28 +71,17 @@ public class CollectionMenu {
         }
     }
 
-    private void moveMultipleArtworks() {
+    private void showLoanStatus() {
+        String locationQuery = "SELECT l from Location l WHERE l.name = 'On Loan'";
+        TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
+        Location onLoanLocation = jpqlQueryLocation.getSingleResult();
 
-        Location newLocation = findAllLocations().get(2);
-        Location oldLocation = findAllLocations().get(1);
-
-        List<Artwork> artworksToMove = new ArrayList<>();
-        for (Artwork a : oldLocation.getArtworks()) {
-            artworksToMove.add(a);
-        }
-        System.out.println(artworksToMove);
-
-        // Act
-        for (Artwork a  : artworksToMove) {
-            if (newLocation instanceof OnLoan) {
-                moveArtworkOnLoan(a, newLocation);
-            }
-            else {
-                a.moveTo(newLocation);
-                executeTransaction(em -> {
-                    em.persist(a);
-                });
-            }
+        System.out.println("\n\n\n\n\n\n\n\n\n\n\nThe following artworks are on loan, which one would you like to see further info of?");
+        printArtworksAtLocation(onLoanLocation);
+        try {
+            Artwork artworkOnLoan = findArtworkWithID();
+            System.out.println(artworkOnLoan.getBruikleenContract().toString());
+        } catch (NoResultException e) {
         }
     }
 
@@ -100,8 +94,8 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\nSelected artwork: " + artwork.toString());
 
         // Act
-        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
-                + locations.get(1) + " , type 3 when the artwork goes on loan");
+        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + ", type 2 for moving it to the "
+                + locations.get(1) + ", type 3 when the artwork goes on loan");
 
         boolean proceed = true;
         while (proceed) {
@@ -129,10 +123,10 @@ public class CollectionMenu {
                     }
                     em.clear();
                     System.out.println("Artwork with ID " + artwork.getId() + " is now at location " + artwork.getLocation());
-                } else System.out.println("\"Try again typing either 1, 2 or 3");
+                } else System.out.println("Try again typing either 1, 2 or 3");
 
             } catch (NumberFormatException e) {
-                System.out.println("\"Try again typing either 1, 2 or 3");
+                System.out.println("Try again typing either 1, 2 or 3");
 
             }
         }
@@ -152,9 +146,10 @@ public class CollectionMenu {
         em.clear();
     }
 
-    // Add catch for no result exception => try again or return to collection menu.
+    // Below method throws NoResultException if user selects 0. Thus when using this method, ensure
+    // to add a catch for no result exception to return to collection menu.
     private Artwork findArtworkWithID() {
-        System.out.println("\nType ID number of artwork you want to change (or 0 to return to the main menu)");
+        System.out.println("\nType ID number of artwork you want to select (or 0 to return to the main menu)");
         Long inputID = getValidIDLong();
 
         boolean proceed = true;
@@ -169,7 +164,7 @@ public class CollectionMenu {
                     if (foundArtwork == null) {
                         throw new NoResultException();
                     } else
-                    return foundArtwork;
+                        return foundArtwork;
                 } catch (NoResultException e) {
                     System.out.println("Artwork not found, try again (or 0 to return to the main menu)");
                     inputID = getValidIDLong();
@@ -181,12 +176,15 @@ public class CollectionMenu {
 
     private boolean moveArtworkOnLoan(Artwork artwork, Location onLoan) {
         System.out.println("To move an artwork to on loan, please add the following for the loan contract:" +
-                "What is the address?");
-        Scanner scanner = new Scanner(System.in);
+                "\nWhat is the address?");
         String address = scanner.nextLine();
+
+        System.out.println("Till when will the artwork be on loan? The date should be entered in the following format YEAR-MONTH-DAY (e.g. 2024-08-12)");
+        LocalDate returnDate = getValidDate();
+
         System.out.println("\n\n" + artwork + " will go on loan at the following address: " + address);
 
-        BruikleenContract bruikleenContract = new BruikleenContract(artwork, address);
+        BruikleenContract bruikleenContract = new BruikleenContract(artwork, address, returnDate);
         artwork.setBruikleenContract(bruikleenContract);
         boolean successMove = artwork.moveTo(onLoan);
 
@@ -197,21 +195,33 @@ public class CollectionMenu {
         return successMove;
     }
 
+    private LocalDate getValidDate() {
+        LocalDate returnDate = null;
+        boolean proceed = true;
+        while (proceed) {
+            String returnDateString = scanner.nextLine();
+            try {
+                returnDate = LocalDate.parse(returnDateString);
+                proceed = false;
+            } catch (DateTimeParseException e) {
+                System.out.println("Try again, the date should be entered in the following format YEAR-MONTH-DAY (e.g. 2024-08-12)");
+            }
+        }
+
+        return returnDate;
+    }
+
     private void selectArtworksListAndPrintToConsole() {
 //        Mapping out the options:
         List<Location> locations = findAllLocations();
         System.out.println("1) All artworks in the collection" +
                 "\n2) All artworks at " + locations.get(0).toString() +
                 "\n3) All artworks at " + locations.get(1).toString() +
-                "\n4) All artworks at " + locations.get(2).toString());
+                "\n4) All artworks on loan");
 
 
         String userInput = scanner.nextLine();
         boolean proceed = true;
-
-        // could make this conditional (the else if statements), but that would mean that the input needs to be
-        // int and not String so the option can be user input == 0 || userinput < locations.size()
-        // Also would presume here that the userinput equals the ID of the location, this can be mapped better.
 
         while (proceed) {
             if (userInput.equals("1")) {
@@ -221,12 +231,15 @@ public class CollectionMenu {
                 }
                 proceed = false;
             } else if (userInput.equals("2")) {
+                System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are at " + locations.get(0).toString());
                 printArtworksAtLocation(locations.get(0));
                 proceed = false;
             } else if (userInput.equals("3")) {
+                System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are at " + locations.get(1).toString());
                 printArtworksAtLocation(locations.get(1));
                 proceed = false;
             } else if (userInput.equals("4")) {
+                System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are on loan");
                 printArtworksAtLocation(locations.get(2));
                 proceed = false;
             } else {
@@ -265,9 +278,12 @@ public class CollectionMenu {
 
     private void printArtworksAtLocation(Location location) {
         List<Artwork> artwork = location.getArtworks();
-        System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are at " + location.toString());
 
         for (Artwork a : artwork) {
+            if (a == null) {
+                System.out.println("No artworks are at this location");
+                break;
+            }
             System.out.println("ID: " + a.getId() + " " + a.toString());
         }
 

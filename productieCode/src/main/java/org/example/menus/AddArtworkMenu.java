@@ -36,6 +36,7 @@ public class AddArtworkMenu {
                 em.persist(artist);
                 em.persist(artwork);
             });
+            em.clear();
             System.out.println("\n\n\n\n\n\n\n\n\n\nYou added the following object to the database: \n" +
                     artwork.toString());
         }
@@ -130,6 +131,7 @@ public class AddArtworkMenu {
         String queryAllNamesString = "SELECT a.name FROM Artist a";
         TypedQuery<String> queryAllNames = em.createQuery(queryAllNamesString, String.class);
         List<String> namesArtists = queryAllNames.getResultList();
+
         String duplicateName = "XXX";
         for (String name : namesArtists) {
             if (name.toUpperCase().contains(inputName.toUpperCase())) {

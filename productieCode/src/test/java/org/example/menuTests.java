@@ -9,6 +9,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -192,10 +194,26 @@ public class menuTests {
     @Test
     @DisplayName("Quick check what exceptions is thrown when scanner input can not be cast to Long")
     void testLongException() {
-        System.out.println("Type a long (but not really because this is a test and I need the name of the exception)");
-        Long longID= Long.parseLong(scanner.nextLine());
+//        System.out.println("Type a long (but not really because this is a test and I need the name of the exception)");
+//        Long longID= Long.parseLong(scanner.nextLine());
 
         // it is a NumberformatException!
+    }
+
+    @Test
+    @DisplayName("Testing the local Date time formatter. Throws DateTimeParseException")
+    void castToLocalDateTime() {
+        LocalDate returnDate = null;
+        boolean proceed = true;
+        while (proceed) {
+            String returnDateString = scanner.nextLine();
+            try {
+                returnDate = LocalDate.parse(returnDateString);
+                proceed = false;
+            } catch (DateTimeParseException e) {
+                System.out.println("Try again, the date should be entered in the following format YEAR-MONTH-DAY (e.g. 2024-08-12)");
+            }
+        }
     }
 
     private void executeTransaction(Consumer<EntityManager> consumer) {

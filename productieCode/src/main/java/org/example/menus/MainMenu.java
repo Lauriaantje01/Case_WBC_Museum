@@ -35,13 +35,14 @@ public class MainMenu {
     public void startMenu() {
         createMuseum();
         em.close(); // Presume that from now one the menu does not need to interact with the museum objects anymore.
+        System.out.println("Type the number of one of the following options to continue:");
 
         boolean proceed = true;
 
         while (proceed) {
-            System.out.println("Type 1 if you would like to have a look and/or modify the current works in the collection\n" +
-                    "Type 2 if you want to add a new artwork to the collection.\n" +
-                    "Type 0 if you want to exit the program");
+            System.out.println("1) Show and/or modify the current works in the collection\n" +
+                    "2) Add a new artwork to the collection.\n" +
+                    "0) Exit the program");
             String input = scanner.nextLine();
 
             if (input.equals("1")) {
