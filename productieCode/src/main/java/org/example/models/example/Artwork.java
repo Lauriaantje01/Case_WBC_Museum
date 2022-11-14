@@ -70,11 +70,17 @@ public class Artwork {
     }
 
     public boolean moveTo(Location location) {
-        if (location instanceof OnLoan) {
-            if (this.getBruikleenContract().getReturnDate().isBefore(LocalDate.now())) {
-                System.out.println("Artwork is still on loan");
+        if (this.location instanceof OnLoan) {
+            if (this.getBruikleenContract().getReturnDate().isAfter(LocalDate.now())) {
+                System.out.println("Artwork is on loan till " + this.getBruikleenContract().getReturnDate() +
+                        ". Till then it cannot be moved.");
                 return false;
             }
+            else {
+                setLocation(location);
+                return true;
+            }
+
         } else {
             if (location.add(this)) {
                 this.location = location;
@@ -84,7 +90,17 @@ public class Artwork {
                 return false;
             }
         }
-        return false;
+    }
+
+    public boolean goesOnLoan(OnLoan onLoan, BruikleenContract bruikleenContract) {
+        setBruikleenContract(bruikleenContract);
+        if (onLoan.add(this)) {
+            this.location = onLoan;
+            return true;
+        } else {
+            System.out.println("Artwork with ID " + this.id + " was already in the location or something else went wrong");
+            return false;
+        }
     }
 
     public BruikleenContract getBruikleenContract() {

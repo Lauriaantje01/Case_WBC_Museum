@@ -184,7 +184,7 @@ public class CollectionMenu {
         return foundArtwork;
     }
 
-    private boolean moveArtworkOnLoan(Artwork artwork, Location onLoan) {
+    private void moveArtworkOnLoan(Artwork artwork, Location onLoan) {
         System.out.println("To move an artwork to on loan, please add the following for the loan contract:" +
                 "\nWhat is the address?");
         String address = scanner.nextLine();
@@ -195,8 +195,7 @@ public class CollectionMenu {
         System.out.println("\n\n" + artwork + " will go on loan at the following address: " + address);
 
         BruikleenContract bruikleenContract = new BruikleenContract(artwork, address, returnDate);
-        artwork.setBruikleenContract(bruikleenContract);
-        boolean successMove = artwork.moveTo(onLoan);
+        artwork.goesOnLoan((OnLoan) onLoan, bruikleenContract);
 
         executeTransaction(em -> {
             em.persist(artwork);
@@ -205,7 +204,7 @@ public class CollectionMenu {
         });
         em.clear();
 
-        return successMove;
+        //return successMove;
     }
 
     private LocalDate getValidDate() {
