@@ -37,7 +37,7 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\nWhat would you like to see?");
         selectArtworksListAndPrintToConsole();
 
-        System.out.println("\n1) Update one of these works" +
+        System.out.println("\n1) Update the location of an artwork" +
                 "\n2) Show another selection of works" +
                 "\n3) Retrieve loan contract of artworks on loan" +
                 "\n0) Return to the main menu");
@@ -48,6 +48,7 @@ public class CollectionMenu {
         while (proceed) {
             if (userInput.equals("1")) {
                 try {
+                    System.out.println("\nType ID number of artwork you want to select (or 0 to return to the main menu)");
                     Artwork artworkToChange = findArtworkWithID();
                     changeLocation(artworkToChange);
                 } catch (NoResultException e) {
@@ -61,6 +62,7 @@ public class CollectionMenu {
             } else if (userInput.equals("3")) {
                 showLoanStatus();
                 proceed = false;
+                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
             } else if (userInput.equals("0")) {
                 proceed = false;
                 System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
@@ -76,12 +78,26 @@ public class CollectionMenu {
         TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
         Location onLoanLocation = jpqlQueryLocation.getSingleResult();
 
-        System.out.println("\n\n\n\n\n\n\n\n\n\n\nThe following artworks are on loan, which one would you like to see further info of?");
+        System.out.println("\n\n\n\n\n\n\n\n\n\n\nThe following artworks are on loan:");
         printArtworksAtLocation(onLoanLocation);
-        try {
-            Artwork artworkOnLoan = findArtworkWithID();
-            System.out.println(artworkOnLoan.getBruikleenContract().toString());
-        } catch (NoResultException e) {
+        System.out.println("\n\nGive the artwork ID if you want to see the loan contract of an artwork " +
+                "(or 0 to return to the main menu).");
+
+        boolean proceed = true;
+        while (proceed)
+        {
+            try {
+                Artwork artworkOnLoan = findArtworkWithID();
+                System.out.println(artworkOnLoan.getBruikleenContract().toString());
+                proceed = false;
+            } catch (NoResultException e) {
+                // thrown by findArtworkID
+                proceed = false;
+            } catch (NullPointerException e) {
+                // thrown if there is no contract
+                System.out.println("\n\n\n\n\n\nLooks like the artwork you selected does not have a loan contract." +
+                        "\nTry again with another artwork ID or choose 0 to return to the main menu.");
+            }
         }
     }
 
@@ -149,7 +165,6 @@ public class CollectionMenu {
     // Below method throws NoResultException if user selects 0. Thus when using this method, ensure
     // to add a catch for no result exception to return to collection menu.
     private Artwork findArtworkWithID() {
-        System.out.println("\nType ID number of artwork you want to select (or 0 to return to the main menu)");
         Long inputID = getValidIDLong();
 
         boolean proceed = true;
@@ -277,16 +292,15 @@ public class CollectionMenu {
     }
 
     private void printArtworksAtLocation(Location location) {
-        List<Artwork> artwork = location.getArtworks();
+        List<Artwork> artworks = location.getArtworks();
 
-        for (Artwork a : artwork) {
-            if (a == null) {
-                System.out.println("No artworks are at this location");
-                break;
+        if (artworks.size() == 0) {
+            System.out.println("No artworks are currently at this location / are on loan");
+        } else {
+
+            for (Artwork a : artworks) {
+                System.out.println("ID: " + a.getId() + " " + a.toString());
             }
-            System.out.println("ID: " + a.getId() + " " + a.toString());
         }
-
     }
-
 }
