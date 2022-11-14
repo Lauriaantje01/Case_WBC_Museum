@@ -35,6 +35,7 @@ public class AddArtworkMenu {
             executeTransaction(em -> {
                 em.persist(artist);
                 em.persist(artwork);
+                em.persist(artwork.getLocation());
             });
             em.clear();
             System.out.println("\n\n\n\n\n\n\n\n\n\nYou added the following object to the database: \n" +

@@ -52,4 +52,8 @@ public class BruikleenContract {
     public String toString() {
         return "[Loan contract " + this.id + " for artwork " + artwork.getId() + "\n Address: " + this.address + "\n Return date: " +this.returnDate + "]";
     }
+
+    public LocalDate getReturnDate() {
+        return this.returnDate;
+    }
 }

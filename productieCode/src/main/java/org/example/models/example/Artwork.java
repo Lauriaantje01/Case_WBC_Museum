@@ -1,6 +1,7 @@
 package org.example.models.example;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 public class Artwork {
@@ -27,17 +28,16 @@ public class Artwork {
         return id;
     }
 
-    public Artwork(String title, Artist artist, int year) {
-        setTitle(title);
-        setArtist(artist);
-        setYear(year);
-    }
-
     public Artwork(String title, Artist artist, int year, Location location) {
         setTitle(title);
         setArtist(artist);
         setYear(year);
+        setLocation(location);
+    }
+
+    public void setLocation(Location location) {
         this.location = location;
+        location.getArtworks().add(this);
     }
 
     public Artwork() {
@@ -70,13 +70,21 @@ public class Artwork {
     }
 
     public boolean moveTo(Location location) {
-        if (location.add(this)) {
-            this.location = location;
-            return true;
+        if (location instanceof OnLoan) {
+            if (this.getBruikleenContract().getReturnDate().isBefore(LocalDate.now())) {
+                System.out.println("Artwork is still on loan");
+                return false;
+            }
         } else {
-            System.out.println("Artwork with ID " + this.id + " was already in the location or something else went wrong");
-            return false;
+            if (location.add(this)) {
+                this.location = location;
+                return true;
+            } else {
+                System.out.println("Artwork with ID " + this.id + " was already in the location or something else went wrong");
+                return false;
+            }
         }
+        return false;
     }
 
     public BruikleenContract getBruikleenContract() {
@@ -89,8 +97,7 @@ public class Artwork {
 
     @Override
     public String toString() {
-        return "[Title: " + title + ", Artist: " + artist.getName() + ", Year: " + year + ", Location: " + location +"]";
+        return "[Title: " + title + ", Artist: " + artist.getName() + ", Year: " + year + ", Location: " + location + "]";
     }
-
 
 }

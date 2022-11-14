@@ -33,42 +33,36 @@ public class CollectionMenu {
     }
 
     public void startCollectionMenu() {
-        // Could add option to look at artists instead for updates....
-        System.out.println("\n\n\n\n\nWhat would you like to see?");
+        // First allow the user to look at the artworks already available (so they can already see the artwork IDs)
         selectArtworksListAndPrintToConsole();
 
-        System.out.println("\n1) Update the location of an artwork" +
-                "\n2) Show another selection of works" +
-                "\n3) Retrieve loan contract of artworks on loan" +
-                "\n0) Return to the main menu");
-
-        String userInput = scanner.nextLine();
         boolean proceed = true;
 
         while (proceed) {
+            System.out.println("\n\n\n\n\nWhat would you like to do?" +
+                    "\n1) Update the location of an artwork" +
+                    "\n2) Show another selection of artworks" +
+                    "\n3) Retrieve loan contract of artworks on loan" +
+                    "\n0) Return to the main menu");
+            String userInput = scanner.nextLine();
+
             if (userInput.equals("1")) {
                 try {
-                    System.out.println("\nType ID number of artwork you want to select (or 0 to return to the main menu)");
-                    Artwork artworkToChange = findArtworkWithID();
-                    changeLocation(artworkToChange);
+                    changeLocation();
                 } catch (NoResultException e) {
                     proceed = false;
                 }
                 System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
                 proceed = false;
             } else if (userInput.equals("2")) {
-                startCollectionMenu();
-                proceed = false;
+                selectArtworksListAndPrintToConsole();
             } else if (userInput.equals("3")) {
                 showLoanStatus();
-                proceed = false;
-                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
             } else if (userInput.equals("0")) {
                 proceed = false;
                 System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
             } else {
                 System.out.println("Try again typing either 1, 2 or 0");
-                userInput = scanner.nextLine();
             }
         }
     }
@@ -81,7 +75,7 @@ public class CollectionMenu {
         System.out.println("\n\n\n\n\n\n\n\n\n\n\nThe following artworks are on loan:");
         printArtworksAtLocation(onLoanLocation);
         System.out.println("\n\nGive the artwork ID if you want to see the loan contract of an artwork " +
-                "(or 0 to return to the main menu).");
+                "(or 0 to return to the collection menu).");
 
         boolean proceed = true;
         while (proceed)
@@ -101,11 +95,14 @@ public class CollectionMenu {
         }
     }
 
-    /*       Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
-       Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
+    /*       A seperate function is called for objects on loan, ensuring that a contract for the loan is created
+      Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
       their own persist statements.
      */
-    private void changeLocation(Artwork artwork) {
+    private void changeLocation() {
+        System.out.println("\nType ID number of artwork you want to select (or 0 to return to the main menu)");
+        Artwork artwork = findArtworkWithID();
+
         List<Location> locations = findAllLocations();
         System.out.println("\n\n\n\n\nSelected artwork: " + artwork.toString());
 
@@ -140,10 +137,8 @@ public class CollectionMenu {
                     em.clear();
                     System.out.println("Artwork with ID " + artwork.getId() + " is now at location " + artwork.getLocation());
                 } else System.out.println("Try again typing either 1, 2 or 3");
-
             } catch (NumberFormatException e) {
                 System.out.println("Try again typing either 1, 2 or 3");
-
             }
         }
     }
@@ -206,7 +201,10 @@ public class CollectionMenu {
         executeTransaction(em -> {
             em.persist(artwork);
             em.persist(bruikleenContract);
+            //em.persist(onLoan);
         });
+        em.clear();
+
         return successMove;
     }
 
@@ -227,6 +225,7 @@ public class CollectionMenu {
     }
 
     private void selectArtworksListAndPrintToConsole() {
+        System.out.println("\n\n\n\n\nWhat would you like to see?");
 //        Mapping out the options:
         List<Location> locations = findAllLocations();
         System.out.println("1) All artworks in the collection" +
@@ -242,7 +241,7 @@ public class CollectionMenu {
             if (userInput.equals("1")) {
                 List<Artwork> artwork = findAllArtworks();
                 for (Artwork a : artwork) {
-                    System.out.println("ID: " + a.getId() + " " + a.toString());
+                    System.out.println("    ID: " + a.getId() + " " + a.toString());
                 }
                 proceed = false;
             } else if (userInput.equals("2")) {
@@ -295,11 +294,11 @@ public class CollectionMenu {
         List<Artwork> artworks = location.getArtworks();
 
         if (artworks.size() == 0) {
-            System.out.println("No artworks are currently at this location / are on loan");
+            System.out.println("    No artworks are currently at this location / are on loan");
         } else {
 
             for (Artwork a : artworks) {
-                System.out.println("ID: " + a.getId() + " " + a.toString());
+                System.out.println("    ID: " + a.getId() + " " + a.toString());
             }
         }
     }
