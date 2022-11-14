@@ -27,10 +27,6 @@ public class Artwork {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Artwork(String title, Artist artist, int year) {
         setTitle(title);
         setArtist(artist);
@@ -78,7 +74,7 @@ public class Artwork {
             this.location = location;
             return true;
         } else {
-            System.out.println("Artwork was already in the location or something else went wrong");
+            System.out.println("Artwork with ID " + this.id + " was already in the location or something else went wrong");
             return false;
         }
     }

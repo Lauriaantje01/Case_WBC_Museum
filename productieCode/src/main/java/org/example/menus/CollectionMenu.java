@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -30,10 +31,11 @@ public class CollectionMenu {
     public void startCollectionMenu() {
         // Could add option to look at artists instead for updates....
         System.out.println("\n\n\n\n\nWhat would you like to see?");
-        printSelectionArtworksToConsole();
+        selectArtworksListAndPrintToConsole();
 
         System.out.println("\nType 1 If you would like to update one of these works" +
-                "\nType 2 to show another selection of works" +
+                "\nType 2 If you would like to update all the works in a location" +
+                "\nType 3 to show another selection of works" +
                 "\nType 0 to return to the main menu");
 
         String userInput = scanner.nextLine();
@@ -50,6 +52,8 @@ public class CollectionMenu {
                 System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
                 proceed = false;
             } else if (userInput.equals("2")) {
+                moveMultipleArtworks();
+            } else if (userInput.equals("3")) {
                 startCollectionMenu();
                 proceed = false;
             } else if (userInput.equals("0")) {
@@ -62,48 +66,76 @@ public class CollectionMenu {
         }
     }
 
-/*       Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
-   Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
-  their own persist statements.
- */
-    private void changeLocation(Artwork artwork) {
-        List<Location> locations = findAllLocations();
-        System.out.println("Selected artwork: " + artwork.toString());
+    private void moveMultipleArtworks() {
+
+        Location newLocation = findAllLocations().get(2);
+        Location oldLocation = findAllLocations().get(1);
+
+        List<Artwork> artworksToMove = new ArrayList<>();
+        for (Artwork a : oldLocation.getArtworks()) {
+            artworksToMove.add(a);
+        }
+        System.out.println(artworksToMove);
 
         // Act
-        System.out.println("\n\n\n\n\nType 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
+        for (Artwork a  : artworksToMove) {
+            if (newLocation instanceof OnLoan) {
+                moveArtworkOnLoan(a, newLocation);
+            }
+            else {
+                a.moveTo(newLocation);
+                executeTransaction(em -> {
+                    em.persist(a);
+                });
+            }
+        }
+    }
+
+    /*       Note that for the onloan there is a seperate function called, ensuring that a contract for the loan is created
+       Since this method has its own persist (that of the artwork and the loan contract) the other change locations need
+      their own persist statements.
+     */
+    private void changeLocation(Artwork artwork) {
+        List<Location> locations = findAllLocations();
+        System.out.println("\n\n\n\n\nSelected artwork: " + artwork.toString());
+
+        // Act
+        System.out.println("Type 1 to move the artwork to the " + locations.get(0) + " , type 2 for moving it to the "
                 + locations.get(1) + " , type 3 when the artwork goes on loan");
 
-        try {
-            int userInput = Integer.parseInt(scanner.nextLine());
-            Location locationInput = null;
+        boolean proceed = true;
+        while (proceed) {
+            try {
+                int userInput = Integer.parseInt(scanner.nextLine());
+                Location locationInput = null;
 
-            if (userInput > 0 && userInput <= 3) {
-                if (userInput == 3) {
-                    locationInput = locations.get(2);
-                    moveArtworkOnLoan(artwork, locationInput);
-                }
-                else {
-                    if (userInput == 1) {
-                        locationInput = locations.get(0);
+                if (userInput > 0 && userInput <= 3) {
+                    if (userInput == 3) {
+                        locationInput = locations.get(2);
+                        moveArtworkOnLoan(artwork, locationInput);
+                        proceed = false;
+                    } else {
+                        if (userInput == 1) {
+                            locationInput = locations.get(0);
+                        }
+                        if (userInput == 2) {
+                            locationInput = locations.get(1);
+                        }
+                        artwork.moveTo(locationInput);
+                        executeTransaction(em -> {
+                            em.persist(artwork);
+                        });
+                        proceed = false;
                     }
-                    if (userInput == 2) {
-                        locationInput = locations.get(1);
-                    }
-                    artwork.moveTo(locationInput);
-                    executeTransaction(em -> {
-                        em.persist(artwork);
-                    });
-                }
-                em.clear();
-                System.out.println(artwork.toString() + " was succesfully moved to " + locationInput.toString());
-            } else System.out.println("\"Try again typing either 1, 2 or 3");
+                    em.clear();
+                    System.out.println("Artwork with ID " + artwork.getId() + " is now at location " + artwork.getLocation());
+                } else System.out.println("\"Try again typing either 1, 2 or 3");
 
-        } catch (NumberFormatException e) {
-            System.out.println("\"Try again typing either 1, 2 or 3");
+            } catch (NumberFormatException e) {
+                System.out.println("\"Try again typing either 1, 2 or 3");
 
+            }
         }
-
     }
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
@@ -165,12 +197,13 @@ public class CollectionMenu {
         return successMove;
     }
 
-    private void printSelectionArtworksToConsole() {
+    private void selectArtworksListAndPrintToConsole() {
 //        Mapping out the options:
+        List<Location> locations = findAllLocations();
         System.out.println("1) All artworks in the collection" +
-                "\n2) All artworks at " + findAllLocations().get(0).toString() +
-                "\n3) All artworks at " + findAllLocations().get(1).toString() +
-                "\n4) All artworks at " + findAllLocations().get(2).toString());
+                "\n2) All artworks at " + locations.get(0).toString() +
+                "\n3) All artworks at " + locations.get(1).toString() +
+                "\n4) All artworks at " + locations.get(2).toString());
 
 
         String userInput = scanner.nextLine();
@@ -188,13 +221,13 @@ public class CollectionMenu {
                 }
                 proceed = false;
             } else if (userInput.equals("2")) {
-                printArtworksAtLocation(0);
+                printArtworksAtLocation(locations.get(0));
                 proceed = false;
             } else if (userInput.equals("3")) {
-                printArtworksAtLocation(1);
+                printArtworksAtLocation(locations.get(1));
                 proceed = false;
             } else if (userInput.equals("4")) {
-                printArtworksAtLocation(2);
+                printArtworksAtLocation(locations.get(2));
                 proceed = false;
             } else {
                 System.out.println("Try again typing either 1, 2, 3 or 4");
@@ -230,10 +263,7 @@ public class CollectionMenu {
         return jpqlQueryLocation.getResultList();
     }
 
-    private void printArtworksAtLocation(int index) {
-        var locations = findAllLocations();
-        Location location = locations.get(index);
-
+    private void printArtworksAtLocation(Location location) {
         List<Artwork> artwork = location.getArtworks();
         System.out.println("\n\n\n\n\n\n\n\n\n\nThe following artworks are at " + location.toString());
 

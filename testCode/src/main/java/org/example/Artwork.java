@@ -78,7 +78,7 @@ public class Artwork {
             this.location = location;
             return true;
         } else {
-            System.out.println("Artwork was already in the location or something else went wrong");
+            System.out.println("Artwork with ID " + this.id + " was already in the location or something else went wrong");
             return false;
         }
     }

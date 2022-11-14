@@ -7,9 +7,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class testUpdateMultipleArtworks {
 
@@ -22,7 +25,7 @@ public class testUpdateMultipleArtworks {
     @DisplayName("Writing a code in which user could either show a list of artworks based on location, or a general " +
             "list of all artworks. Console will print all the artworks according to the chosen selection criteria in this" +
             "test")
-    void methodToShowListOfArtworks () {
+    void methodToShowListOfArtworks() {
         createMuseum();
         System.out.println("What would you like to see?" +
                 "\n1) All artworks in the collection" +
@@ -40,38 +43,33 @@ public class testUpdateMultipleArtworks {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            }
-            else if (userInput == 2){
+            } else if (userInput == 2) {
                 List<Artwork> artwork = findArtworksAtLocation(0);
 
                 for (Artwork a : artwork) {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            }
-            else if (userInput == 3){
+            } else if (userInput == 3) {
                 List<Artwork> artwork = findArtworksAtLocation(1);
 
                 for (Artwork a : artwork) {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            }
-            else if (userInput == 4){
+            } else if (userInput == 4) {
                 List<Artwork> artwork = findArtworksAtLocation(2);
 
                 for (Artwork a : artwork) {
                     System.out.println(a.getId() + " " + a.toString());
                 }
                 proceed = false;
-            }
-            else if (userInput == 0) {
+            } else if (userInput == 0) {
                 proceed = false;
             } else System.out.println("Try again typing either 1, 2 or 3");
         }
 
     }
-
 
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
@@ -128,6 +126,36 @@ public class testUpdateMultipleArtworks {
         return foundArtwork;
     }
 
+    @Test
+    @DisplayName("Moving multiple artworks with user input. Selection is based on the artworks at a certain location")
+    void movingMultipleArtworks() {
+        // Arrange
+        createMuseum();
+        Location newLocation = findAllLocations().get(2);
+        Location oldLocation = findAllLocations().get(1);
+        List<Artwork> artworksToMove = new ArrayList<>();
+        for (Artwork a : oldLocation.getArtworks()) {
+            artworksToMove.add(a);
+        }
+        System.out.println(artworksToMove);
+
+        // Act
+        for (Artwork a  : artworksToMove) {
+            if (newLocation instanceof OnLoan) {
+                moveArtworkOnLoan(a, newLocation);
+            }
+            else {
+                a.moveTo(newLocation);
+                executeTransaction(em -> {
+                    em.persist(a);
+                });
+            }
+        }
+        //Assert
+        assertThat(artworksToMove.get(0).getLocation()).isEqualTo(newLocation);
+    }
+
+
     private List<Artwork> findAllArtworks() {
         String queryFindAllArtworks = "SELECT a from Artwork a";
         TypedQuery<Artwork> psqlQuery = em.createQuery(queryFindAllArtworks, Artwork.class);
@@ -140,8 +168,26 @@ public class testUpdateMultipleArtworks {
         return jpqlQueryLocation.getResultList();
     }
 
-    private List<Artwork> findArtworksAtLocation (int index) {
+    private List<Artwork> findArtworksAtLocation(int index) {
         Location location = findAllLocations().get(index);
         return location.getArtworks();
+    }
+
+    private boolean moveArtworkOnLoan(Artwork artwork, Location onloan) {
+        System.out.println("To move the artwork to on loan, please add the following for the loan contract of artwork with ID " + artwork.getId() + "." +
+                "\nWhat is the address?");
+        Scanner scanner = new Scanner(System.in);
+        String address = scanner.nextLine();
+        System.out.println(artwork + " will go on loan at the following address: " + address);
+
+        BruikleenContract bruikleenContract = new BruikleenContract(artwork, address);
+        artwork.setBruikleenContract(bruikleenContract);
+        boolean successMove = artwork.moveTo(onloan);
+
+        executeTransaction(em -> {
+            em.persist(artwork);
+            em.persist(bruikleenContract);
+        });
+        return successMove;
     }
 }

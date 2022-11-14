@@ -190,14 +190,13 @@ public class menuTests {
     }
 
     @Test
-    @DisplayName("Quickly checking what exceptions is thrown when scanner input can not be cast to Long")
+    @DisplayName("Quick check what exceptions is thrown when scanner input can not be cast to Long")
     void testLongException() {
         System.out.println("Type a long (but not really because this is a test and I need the name of the exception)");
         Long longID= Long.parseLong(scanner.nextLine());
 
         // it is a NumberformatException!
     }
-
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
         try {

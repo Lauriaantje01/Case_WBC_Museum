@@ -53,7 +53,7 @@ public class MainMenu {
             } else if (input.equals("0")) {
                 proceed = false;
 
-            } else System.out.println("Try again typing either 1, 2 or 3");
+            } else System.out.println("Try again typing either 1, 2 or 0");
         }
 
         System.out.println("goodbye!");
