@@ -157,7 +157,7 @@ public class CollectionMenu {
         em.clear();
     }
 
-    // Below method throws NoResultException if user selects 0. Thus when using this method, ensure
+    // Below method throws NoResultException if user selects 0. Thus, when using this method, ensure
     // to add a catch for no result exception to return to collection menu.
     private Artwork findArtworkWithID() {
         Long inputID = getValidIDLong();
