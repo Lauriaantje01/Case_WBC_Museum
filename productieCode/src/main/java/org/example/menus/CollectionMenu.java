@@ -106,7 +106,6 @@ public class CollectionMenu {
         List<Location> locations = findAllLocations();
         System.out.println("\n\n\n\n\nSelected artwork: " + artwork.toString());
 
-        // Act
         System.out.println("Type 1 to move the artwork to the " + locations.get(0) + ", type 2 for moving it to the "
                 + locations.get(1) + ", type 3 when the artwork goes on loan");
 
@@ -157,8 +156,8 @@ public class CollectionMenu {
         em.clear();
     }
 
-    // Below method throws NoResultException if user selects 0. Thus, when using this method, ensure
-    // to add a catch for no result exception to return to collection menu.
+//     Below method throws NoResultException if user selects 0. Thus, when using this method, ensure
+//     to add a catch for no result exception to return to collection menu.
     private Artwork findArtworkWithID() {
         Long inputID = getValidIDLong();
 
@@ -167,7 +166,7 @@ public class CollectionMenu {
 
         while (proceed) {
             if (inputID == 0) {
-                throw new NoResultException();
+                return null;
             } else {
                 try {
                     foundArtwork = em.find(Artwork.class, inputID);
@@ -189,7 +188,7 @@ public class CollectionMenu {
                 "\nWhat is the address?");
         String address = scanner.nextLine();
 
-        System.out.println("Till when will the artwork be on loan? The date should be entered in the following format YEAR-MONTH-DAY (e.g. 2024-08-12)");
+        System.out.println("Till when will the artwork be on loan? The date should be entered in the following format YYYY-MM-DD (e.g. 2024-08-12)");
         LocalDate returnDate = getValidDate();
 
         System.out.println("\n\n" + artwork + " will go on loan at the following address: " + address);
@@ -200,11 +199,8 @@ public class CollectionMenu {
         executeTransaction(em -> {
             em.persist(artwork);
             em.persist(bruikleenContract);
-            //em.persist(onLoan);
         });
         em.clear();
-
-        //return successMove;
     }
 
     private LocalDate getValidDate() {
