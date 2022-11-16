@@ -13,6 +13,7 @@ public class Artwork {
     private String title;
     @ManyToOne
     private Artist artist;
+
     private int year;
     @ManyToOne
     private Location location;

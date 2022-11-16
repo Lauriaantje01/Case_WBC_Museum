@@ -36,35 +36,33 @@ public class CollectionMenu {
         // First allow the user to look at the artworks already available (so they can already see the artwork IDs)
         selectArtworksListAndPrintToConsole();
 
-        boolean proceed = true;
 
-        while (proceed) {
-            System.out.println("\n\n\n\n\nWhat would you like to do?" +
-                    "\n1) Update the location of an artwork" +
-                    "\n2) Show another selection of artworks" +
-                    "\n3) Retrieve loan contract of artworks on loan" +
-                    "\n0) Return to the main menu");
-            String userInput = scanner.nextLine();
+        String startMenuText = "\n\n\n\n\nWhat would you like to do?" +
+                "\n1) Update the location of an artwork" +
+                "\n2) Show another selection of artworks" +
+                "\n3) Retrieve loan contract of artworks on loan" +
+                "\n0) Return to the main menu";
 
-            if (userInput.equals("1")) {
-                try {
-                    changeLocation();
-                } catch (NoResultException e) {
-                    proceed = false;
-                }
-                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
-                proceed = false;
-            } else if (userInput.equals("2")) {
-                selectArtworksListAndPrintToConsole();
-            } else if (userInput.equals("3")) {
-                showLoanStatus();
-            } else if (userInput.equals("0")) {
-                proceed = false;
-                System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
-            } else {
-                System.out.println("Try again typing either 1, 2 or 0");
+        int userInput = validateUserMenuChoice(3, startMenuText);
+
+        if (userInput==1) {
+            try {
+                changeLocation();
+            } catch (NoResultException e) {
+                return;
             }
+            System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
+        } else if (userInput==2) {
+            selectArtworksListAndPrintToConsole();
+        } else if (userInput.equals("3")) {
+            showLoanStatus();
+        } else if (userInput.equals("0")) {
+            proceed = false;
+            System.out.println("You return to the main menu\n\n\n\n\n\n\n\n");
+        } else {
+            System.out.println("Try again typing either 1, 2 or 0");
         }
+
     }
 
     private void showLoanStatus() {
@@ -78,8 +76,7 @@ public class CollectionMenu {
                 "(or 0 to return to the collection menu).");
 
         boolean proceed = true;
-        while (proceed)
-        {
+        while (proceed) {
             try {
                 Artwork artworkOnLoan = findArtworkWithID();
                 System.out.println(artworkOnLoan.getBruikleenContract().toString());
@@ -156,7 +153,7 @@ public class CollectionMenu {
         em.clear();
     }
 
-//     Below method throws NoResultException if user selects 0. Thus, when using this method, ensure
+    //     Below method throws NoResultException if user selects 0. Thus, when using this method, ensure
 //     to add a catch for no result exception to return to collection menu.
     private Artwork findArtworkWithID() {
         Long inputID = getValidIDLong();
@@ -296,5 +293,26 @@ public class CollectionMenu {
                 System.out.println("    ID: " + a.getId() + " " + a.toString());
             }
         }
+    }
+
+    private int validateUserMenuChoice(int noOfOptions, String menuText) {
+        boolean proceed = true;
+        int userInput = 0;
+
+        System.out.println(menuText);
+
+        while (proceed) {
+            try {
+                userInput = Integer.parseInt(scanner.nextLine());
+                if (userInput > 0 || userInput <= noOfOptions) {
+                    return userInput;
+                } else if (userInput == 0) {
+                    return 0;
+                } else System.out.println("Try again typing the number of one of the options");
+            } catch (NumberFormatException e) {
+                System.out.println("Try again typing the number of one of the options");
+            }
+        }
+        return userInput;
     }
 }

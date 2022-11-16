@@ -71,6 +71,35 @@ public class testUpdateMultipleArtworks {
 
     }
 
+    @Test
+    @DisplayName("Moving multiple artworks with user input. Selection is based on the artworks at a certain location")
+    void movingMultipleArtworks() {
+        // Arrange
+        createMuseum();
+        Location newLocation = findAllLocations().get(2);
+        Location oldLocation = findAllLocations().get(1);
+        List<Artwork> artworksToMove = new ArrayList<>();
+        for (Artwork a : oldLocation.getArtworks()) {
+            artworksToMove.add(a);
+        }
+        System.out.println(artworksToMove);
+
+        // Act
+        for (Artwork a  : artworksToMove) {
+            if (newLocation instanceof OnLoan) {
+                moveArtworkOnLoan(a, newLocation);
+            }
+            else {
+                a.moveTo(newLocation);
+                executeTransaction(em -> {
+                    em.persist(a);
+                });
+            }
+        }
+        //Assert
+        assertThat(artworksToMove.get(0).getLocation()).isEqualTo(newLocation);
+    }
+
 
     private void executeTransaction(Consumer<EntityManager> consumer) {
         try {
@@ -124,35 +153,6 @@ public class testUpdateMultipleArtworks {
         System.out.println(foundArtwork);
 
         return foundArtwork;
-    }
-
-    @Test
-    @DisplayName("Moving multiple artworks with user input. Selection is based on the artworks at a certain location")
-    void movingMultipleArtworks() {
-        // Arrange
-        createMuseum();
-        Location newLocation = findAllLocations().get(2);
-        Location oldLocation = findAllLocations().get(1);
-        List<Artwork> artworksToMove = new ArrayList<>();
-        for (Artwork a : oldLocation.getArtworks()) {
-            artworksToMove.add(a);
-        }
-        System.out.println(artworksToMove);
-
-        // Act
-        for (Artwork a  : artworksToMove) {
-            if (newLocation instanceof OnLoan) {
-                moveArtworkOnLoan(a, newLocation);
-            }
-            else {
-                a.moveTo(newLocation);
-                executeTransaction(em -> {
-                    em.persist(a);
-                });
-            }
-        }
-        //Assert
-        assertThat(artworksToMove.get(0).getLocation()).isEqualTo(newLocation);
     }
 
 
