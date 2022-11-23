@@ -35,6 +35,11 @@ public class Artwork {
         setYear(year);
         setLocation(location);
     }
+    public Artwork(String title, Artist artist, int year) {
+        setTitle(title);
+        setArtist(artist);
+        setYear(year);
+    }
 
     public void setLocation(Location location) {
         this.location = location;

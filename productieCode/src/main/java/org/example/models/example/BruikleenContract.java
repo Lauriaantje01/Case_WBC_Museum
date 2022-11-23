@@ -1,5 +1,7 @@
 package org.example.models.example;
 
+import com.sun.istack.NotNull;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ public class BruikleenContract {
 
     @OneToOne (mappedBy = "bruikleenContract")
     private Artwork artwork;
+
+    @NotNull
     private String address;
 
     public BruikleenContract(Artwork artwork, String address, LocalDate date) {

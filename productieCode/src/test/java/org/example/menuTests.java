@@ -27,11 +27,11 @@ public class menuTests {
     @Test
     void startMenu() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the pilot of the Walter Bosch Complex museum admin system. Continue?");
-        String input = scanner.nextLine();
+        System.out.println("Welcome to the pilot of the Walter Bosch Complex museum admin system. Continue? Type \"yes\" to continue or \"no\" to exit");
         boolean proceed = true;
 
         while (proceed) {
+            String input = scanner.nextLine();
             if (input.equals("yes")) {
                 System.out.println("Hello, proceed?");
                 input = scanner.nextLine();
@@ -45,12 +45,12 @@ public class menuTests {
     void findingDepotLocationFunction() {
         createMuseum();
 
-        String locationQuery = "SELECT l from Location l WHERE l = 'Depot'";
+        String locationQuery = "SELECT l from Location l WHERE l.name = 'Depot'";
         TypedQuery<Location> jpqlQueryLocation = em.createQuery(locationQuery, Location.class);
         Location depot = jpqlQueryLocation.getSingleResult();
 
-        System.out.println(depot);
-
+        assertThat(depot).isInstanceOf(Location.class);
+        assertThat(depot).isInstanceOf(Depot.class);
     }
 
     @Test

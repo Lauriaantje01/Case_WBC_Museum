@@ -11,6 +11,8 @@
     <modules>
         <module>productieCode</module>
         <module>testCode</module>
+        <module>untitled</module>
+        <module>Case2.0</module>
     </modules>
 
     <properties>
@@ -23,6 +25,7 @@
         <latest.assertj-core>3.22.0</latest.assertj-core>
         <latest.hibernate.version>5.6.12.Final</latest.hibernate.version>
         <latest.log4j.version>2.19.0</latest.log4j.version>
+        <latest.weld.version>5.1.0.Final</latest.weld.version>
         <db.name>cursistdb</db.name>
         <db.password>PaSSw0rd</db.password>
     </properties>
@@ -60,6 +63,11 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
                 <version>${latest.log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.weld.se</groupId>
+                <artifactId>weld-se-shaded</artifactId>
+                <version>${latest.weld.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
