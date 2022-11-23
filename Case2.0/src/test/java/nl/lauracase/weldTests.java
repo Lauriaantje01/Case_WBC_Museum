@@ -1,5 +1,6 @@
 package nl.lauracase;
 
+import nl.lauracase.testCases.MenuInNeedOfScanner;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.jboss.weld.inject.WeldInstance;
@@ -19,12 +20,27 @@ public class weldTests {
         Weld weld = new Weld();
         WeldContainer CDIcontainer = weld.initialize();
 
-        WeldInstance<createScanner> proxy = CDIcontainer.select(createScanner.class);
-        createScanner createScanner = proxy.get();
+        WeldInstance<MenuInNeedOfScanner> proxy = CDIcontainer.select(MenuInNeedOfScanner.class);
+        MenuInNeedOfScanner menuInNeedOfScanner = proxy.get();
         // Act
-        Scanner scanner = createScanner.getScanner();
-
-        //Assert
-        assertThat(scanner).isNotNull();
+        menuInNeedOfScanner.doSomething();
     }
+
+    @Test
+    @DisplayName("Test if a weld instance can be created for a scanner class, only one scanner created?")
+    void testScannersWeldInstance() {
+        // Arrange
+        Weld weld = new Weld();
+        WeldContainer CDIcontainer = weld.initialize();
+
+        WeldInstance<MenuInNeedOfScanner> proxy = CDIcontainer.select(MenuInNeedOfScanner.class);
+        MenuInNeedOfScanner menuInNeedOfScanner = proxy.get();
+        Scanner scanner1 = menuInNeedOfScanner.getScanner();
+
+        boolean hasMenu2 = menuInNeedOfScanner.iHaveMenu2();
+
+        assertThat(scanner1).isNotNull();
+        assertThat(hasMenu2).isEqualTo(true);
+    }
+
 }
